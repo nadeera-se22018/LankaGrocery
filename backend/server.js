@@ -2,6 +2,7 @@ import express from 'express';
 import dotenv from 'dotenv';
 import cors from 'cors';
 import connectDB from './config/db.js';
+import productRoutes from './routes/productRoutes.js';
 
 dotenv.config();
 
@@ -15,6 +16,8 @@ app.use(express.json());
 app.get('/', (req, res) => {
     res.send('LankaGrocery API is running...');
 });
+
+app.use('/api/products', productRoutes);
 
 const PORT = process.env.PORT || 5000;
 
