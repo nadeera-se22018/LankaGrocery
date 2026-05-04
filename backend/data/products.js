@@ -1,7 +1,7 @@
 const products = [
     {
         name: 'Fresh Carrots (Nuwara Eliya)',
-        image: '/images/carrots.jpg', 
+        image: 'https://images.unsplash.com/photo-1598170845058-32b9d6a5da37?w=600&q=80', 
         description: 'Fresh organic carrots directly sourced from Nuwara Eliya farms. High quality and rich in nutrition.',
         brand: 'Nature Special',
         category: 'Vegetables',
@@ -12,7 +12,7 @@ const products = [
     },
     {
         name: 'Samba Rice 5kg',
-        image: '/images/rice.jpg',
+        image: 'https://images.unsplash.com/photo-1586201375761-83865001e31c?w=600&q=80',
         description: 'Premium quality Samba rice for your daily meals. Well-milled and sorted.',
         brand: 'Lanka Harvest',
         category: 'Household items',
@@ -23,7 +23,7 @@ const products = [
     },
     {
         name: 'Fresh Milk 1L',
-        image: '/images/milk.jpg',
+        image: 'https://images.unsplash.com/photo-1550583724-b2692b85b150?w=600&q=80',
         description: 'Fresh dairy milk from local farms.',
         brand: 'Highland',
         category: 'Dairy',
