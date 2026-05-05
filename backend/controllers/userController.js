@@ -18,7 +18,7 @@ export const authUser = async (req, res) => {
                 avatar: user.avatar
             });
         } else {
-            res.status(401).json({ message: 'Waradi Email ekak hari Password ekak hari deela thiyenne' });
+            res.status(401).json({ message: 'Email or Password is not valid' });
         }
     } catch (error) {
         res.status(500).json({ message: 'Server Error', error: error.message });
