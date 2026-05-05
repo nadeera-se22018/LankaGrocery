@@ -1,10 +1,18 @@
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import useCartStore from '../store/cartStore';
+import useAuthStore from '../store/authStore';
 
 const Header = () => {
+  const navigate = useNavigate();
   const cartItems = useCartStore((state) => state.cartItems);
-  
   const cartItemCount = cartItems.reduce((acc, item) => acc + item.qty, 0);
+
+  const { userInfo, logout } = useAuthStore();
+
+  const logoutHandler = () => {
+    logout();
+    navigate('/login');
+  };
 
   return (
     <header className="bg-green-600 text-white shadow-md">
@@ -24,9 +32,23 @@ const Header = () => {
                 )}
               </Link>
             </li>
-            <li>
-              <Link to="/login" className="hover:text-green-200 transition">Login</Link>
-            </li>
+            
+            {userInfo ? (
+              <li className="flex items-center space-x-4">
+                <span className="font-semibold text-green-100">Hi, {userInfo.name.split(' ')[0]}</span>
+                <button 
+                  onClick={logoutHandler}
+                  className="bg-green-700 hover:bg-green-800 px-3 py-1 rounded transition text-sm font-bold"
+                >
+                  Logout
+                </button>
+              </li>
+            ) : (
+              <li>
+                <Link to="/login" className="hover:text-green-200 transition font-bold">Login</Link>
+              </li>
+            )}
+
           </ul>
         </nav>
       </div>
