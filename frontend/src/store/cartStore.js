@@ -2,7 +2,9 @@ import { create } from 'zustand';
 
 const useCartStore = create((set) => ({
     cartItems: localStorage.getItem('cartItems') ? JSON.parse(localStorage.getItem('cartItems')) : [],
-    
+
+    shippingAddress: localStorage.getItem('shippingAddress') ? JSON.parse(localStorage.getItem('shippingAddress')) : {},
+
     addToCart: (item) => set((state) => {
         const existItem = state.cartItems.find((x) => x._id === item._id);
         
@@ -23,7 +25,13 @@ const useCartStore = create((set) => ({
         const newCartItems = state.cartItems.filter((x) => x._id !== id);
         localStorage.setItem('cartItems', JSON.stringify(newCartItems));
         return { cartItems: newCartItems };
-    })
+    }),
+
+    saveShippingAddress: (data) => set(() => {
+        localStorage.setItem('shippingAddress', JSON.stringify(data));
+        return { shippingAddress: data };
+    }),
+
 }));
 
 export default useCartStore;
