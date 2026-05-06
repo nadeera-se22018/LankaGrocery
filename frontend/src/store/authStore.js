@@ -15,6 +15,17 @@ const useAuthStore = create((set) => ({
         }
     },
 
+    register: async (name, email, password) => {
+        try {
+            const { data } = await axios.post('/api/users', { name, email, password });
+            localStorage.setItem('userInfo', JSON.stringify(data));
+            set({ userInfo: data });
+            return data;
+        } catch (error) {
+            throw error.response?.data?.message || 'Could not register';
+        }
+    },
+
     logout: () => {
         localStorage.removeItem('userInfo');
         set({ userInfo: null });
