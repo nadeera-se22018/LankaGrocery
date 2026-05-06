@@ -9,7 +9,7 @@ const CartPage = () => {
   const removeFromCart = useCartStore((state) => state.removeFromCart);
 
   const checkoutHandler = () => {
-    navigate('/login?redirect=shipping');
+    navigate('/login?redirect=/shipping');
   };
 
   return (
