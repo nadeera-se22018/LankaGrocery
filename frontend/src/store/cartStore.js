@@ -5,6 +5,8 @@ const useCartStore = create((set) => ({
 
     shippingAddress: localStorage.getItem('shippingAddress') ? JSON.parse(localStorage.getItem('shippingAddress')) : {},
 
+    paymentMethod: localStorage.getItem('paymentMethod') ? JSON.parse(localStorage.getItem('paymentMethod')) : 'Cash on Delivery',
+
     addToCart: (item) => set((state) => {
         const existItem = state.cartItems.find((x) => x._id === item._id);
         
@@ -31,6 +33,16 @@ const useCartStore = create((set) => ({
         localStorage.setItem('shippingAddress', JSON.stringify(data));
         return { shippingAddress: data };
     }),
+
+    savePaymentMethod: (data) => set(() => {
+        localStorage.setItem('paymentMethod', JSON.stringify(data));
+        return { paymentMethod: data };
+    }),
+
+    clearCartItems: () => set(() => {
+        localStorage.removeItem('cartItems');
+        return { cartItems: [] };
+    })
 
 }));
 
