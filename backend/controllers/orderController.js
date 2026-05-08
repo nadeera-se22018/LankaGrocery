@@ -41,3 +41,18 @@ export const addOrderItems = async (req, res) => {
         res.status(500).json({ message: 'Could not save the order', error: error.message });
     }
 };
+
+export const getOrderById = async (req, res) => {
+    try {
+        const order = await Order.findById(req.params.id).populate('user', 'name email');
+
+        if (order) {
+            res.status(200).json(order);
+        } else {
+            res.status(404).json({ message: 'Could not find order' });
+        }
+    } catch (error) {
+        res.status(500).json({ message: 'Server Error', error: error.message });
+    }
+};
+
