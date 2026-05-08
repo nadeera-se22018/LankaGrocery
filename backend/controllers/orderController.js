@@ -56,3 +56,11 @@ export const getOrderById = async (req, res) => {
     }
 };
 
+export const getMyOrders = async (req, res) => {
+    try {
+        const orders = await Order.find({ user: req.user._id });
+        res.status(200).json(orders);
+    } catch (error) {
+        res.status(500).json({ message: 'Orders load karanna bari una', error: error.message });
+    }
+};
