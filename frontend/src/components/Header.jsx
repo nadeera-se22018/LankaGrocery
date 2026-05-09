@@ -35,7 +35,9 @@ const Header = () => {
             
             {userInfo ? (
               <li className="flex items-center space-x-4">
-                <span className="font-semibold text-green-100">Hi, {userInfo.name.split(' ')[0]}</span>
+                <Link to="/profile" className="font-semibold text-green-100 hover:text-white hover:underline transition">
+                  Hi, {userInfo.name.split(' ')[0]}
+                </Link>
                 <button 
                   onClick={logoutHandler}
                   className="bg-green-700 hover:bg-green-800 px-3 py-1 rounded transition text-sm font-bold"
