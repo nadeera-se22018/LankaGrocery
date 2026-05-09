@@ -26,6 +26,17 @@ const useAuthStore = create((set) => ({
         }
     },
 
+    updateProfile: async (userData) => {
+        try {
+            const { data } = await axios.put('/api/users/profile', userData);
+            localStorage.setItem('userInfo', JSON.stringify(data));
+            set({ userInfo: data });
+            return data;
+        } catch (error) {
+            throw error.response?.data?.message || 'Could not update.';
+        }
+    },
+
     logout: () => {
         localStorage.removeItem('userInfo');
         set({ userInfo: null });
