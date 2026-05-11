@@ -38,6 +38,18 @@ const Header = () => {
                 <Link to="/profile" className="font-semibold text-green-100 hover:text-white hover:underline transition">
                   Hi, {userInfo.name.split(' ')[0]}
                 </Link>
+
+                {userInfo.isAdmin && (
+                  <div className="flex space-x-3 border-l border-green-500 pl-4 ml-2">
+                    <Link to="/admin/orders" className="text-sm font-medium bg-green-700 hover:bg-green-800 px-2 py-1 rounded transition">
+                      Orders
+                    </Link>
+                    <Link to="/admin/products" className="text-sm font-medium bg-green-700 hover:bg-green-800 px-2 py-1 rounded transition">
+                      Products
+                    </Link>
+                  </div>
+                )}
+
                 <button 
                   onClick={logoutHandler}
                   className="bg-green-700 hover:bg-green-800 px-3 py-1 rounded transition text-sm font-bold"
