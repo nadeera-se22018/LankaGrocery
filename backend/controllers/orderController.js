@@ -61,6 +61,15 @@ export const getMyOrders = async (req, res) => {
         const orders = await Order.find({ user: req.user._id });
         res.status(200).json(orders);
     } catch (error) {
-        res.status(500).json({ message: 'Orders load karanna bari una', error: error.message });
+        res.status(500).json({ message: 'Could not load the orders', error: error.message });
+    }
+};
+
+export const getOrders = async (req, res) => {
+    try {
+        const orders = await Order.find({}).populate('user', 'id name');
+        res.status(200).json(orders);
+    } catch (error) {
+        res.status(500).json({ message: 'Could not load the orders', error: error.message });
     }
 };
