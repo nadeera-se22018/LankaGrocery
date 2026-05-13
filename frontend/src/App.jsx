@@ -15,6 +15,7 @@ import OrderPage from './pages/OrderPage';
 import ProfilePage from './pages/ProfilePage';
 import AdminRoute from './components/AdminRoute';
 import OrderListPage from './pages/admin/OrderListPage';
+import ProductListPage from './pages/admin/ProductListPage';
 
 const App = () => {
   return (
@@ -42,6 +43,7 @@ const App = () => {
 
             <Route path="" element={<AdminRoute />}>
               <Route path="/admin/orders" element={<OrderListPage />} />
+              <Route path="/admin/products" element={<ProductListPage />} />
             </Route>
             
           </Routes>
