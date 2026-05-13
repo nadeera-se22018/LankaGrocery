@@ -1,27 +1,44 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import axios from 'axios';
 import toast from 'react-hot-toast';
+import useAuthStore from '../store/authStore';
 
 const OrderPage = () => {
   const { id: orderId } = useParams();
   const [order, setOrder] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [loadingDeliver, setLoadingDeliver] = useState(false); 
+
+  const { userInfo } = useAuthStore();
+
+  const fetchOrder = useCallback(async () => {
+    try {
+      const { data } = await axios.get(`/api/orders/${orderId}`);
+      setOrder(data);
+      setLoading(false);
+    } catch (error) {
+      toast.error(error.response?.data?.message || 'Order could not load');
+      setLoading(false);
+    }
+  }, [orderId]);
 
   useEffect(() => {
-    const fetchOrder = async () => {
-      try {
-        const { data } = await axios.get(`/api/orders/${orderId}`);
-        setOrder(data);
-        setLoading(false);
-      } catch (error) {
-        toast.error(error.response?.data?.message || 'Could not load the order');
-        setLoading(false);
-      }
-    };
-
     fetchOrder();
-  }, [orderId]);
+  }, [fetchOrder]);
+
+  const deliverOrderHandler = async () => {
+    try {
+      setLoadingDeliver(true);
+      await axios.put(`/api/orders/${orderId}/deliver`);
+      toast.success('Order Marked as Delivered! 🚚');
+      fetchOrder(); 
+      setLoadingDeliver(false);
+    } catch (error) {
+      toast.error(error.response?.data?.message || 'Could not update');
+      setLoadingDeliver(false);
+    }
+  };
 
   if (loading) {
     return <div className="text-center mt-20 text-2xl font-bold text-gray-500 animate-pulse">Loading Order Details...</div>;
@@ -52,6 +69,7 @@ const OrderPage = () => {
               <strong className="font-semibold text-gray-800">Address: </strong>
               {order.shippingAddress.address}, {order.shippingAddress.city}, {order.shippingAddress.postalCode}, {order.shippingAddress.country}
             </p>
+            
             {order.isDelivered ? (
               <div className="bg-green-100/80 text-green-800 p-4 rounded-lg font-medium border border-green-200">
                 Delivered on {order.deliveredAt.substring(0, 10)}
@@ -122,18 +140,26 @@ const OrderPage = () => {
                 <span className="text-green-700">Rs. {order.totalPrice.toFixed(2)}</span>
               </div>
             </div>
-
-            {!order.isPaid && order.paymentMethod !== 'Cash on Delivery' && (
-               <div className="bg-blue-50 border border-blue-200 text-blue-700 p-4 rounded-lg text-center text-sm font-medium">
-                 Online payment options will be available soon.
-               </div>
-            )}
             
             {!order.isPaid && order.paymentMethod === 'Cash on Delivery' && (
                <div className="bg-yellow-50/80 border border-yellow-200 text-yellow-800 p-4 rounded-lg text-center text-sm font-medium">
                  Please pay Rs. {order.totalPrice.toFixed(2)} to the delivery agent.
                </div>
             )}
+
+            {userInfo && userInfo.isAdmin && !order.isDelivered && (
+              <div className="mt-6 border-t border-gray-200 pt-6">
+                <button
+                  type="button"
+                  className="w-full bg-gray-800 text-white font-bold py-3 rounded hover:bg-gray-900 transition shadow-md"
+                  onClick={deliverOrderHandler}
+                  disabled={loadingDeliver}
+                >
+                  {loadingDeliver ? 'Updating Status...' : 'Mark As Delivered'}
+                </button>
+              </div>
+            )}
+
           </div>
         </div>
 
