@@ -73,3 +73,26 @@ export const getOrders = async (req, res) => {
         res.status(500).json({ message: 'Could not load the orders', error: error.message });
     }
 };
+
+export const updateOrderToDelivered = async (req, res) => {
+    try {
+        const order = await Order.findById(req.params.id);
+
+        if (order) {
+            order.isDelivered = true;
+            order.deliveredAt = Date.now();
+
+            if (order.paymentMethod === 'Cash on Delivery') {
+                order.isPaid = true;
+                order.paidAt = Date.now();
+            }
+
+            const updatedOrder = await order.save();
+            res.status(200).json(updatedOrder);
+        } else {
+            res.status(404).json({ message: 'Order did not find' });
+        }
+    } catch (error) {
+        res.status(500).json({ message: 'Could not update the order', error: error.message });
+    }
+};
