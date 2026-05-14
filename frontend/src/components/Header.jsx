@@ -41,6 +41,9 @@ const Header = () => {
 
                 {userInfo.isAdmin && (
                   <div className="flex space-x-3 border-l border-green-500 pl-4 ml-2">
+                    <Link to="/admin/users" className="text-sm font-medium bg-green-700 hover:bg-green-800 px-2 py-1 rounded transition">
+                      Users
+                    </Link>
                     <Link to="/admin/orders" className="text-sm font-medium bg-green-700 hover:bg-green-800 px-2 py-1 rounded transition">
                       Orders
                     </Link>
