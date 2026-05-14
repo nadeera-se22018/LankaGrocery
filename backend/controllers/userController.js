@@ -92,3 +92,31 @@ export const updateUserProfile = async (req, res) => {
         res.status(500).json({ message: 'Could not update the profile.', error: error.message });
     }
 };
+
+export const getUsers = async (req, res) => {
+    try {
+        const users = await User.find({});
+        res.status(200).json(users);
+    } catch (error) {
+        res.status(500).json({ message: 'Could not load the user', error: error.message });
+    }
+};
+
+export const deleteUser = async (req, res) => {
+    try {
+        const user = await User.findById(req.params.id);
+
+        if (user) {
+            if (user.isAdmin) {
+                res.status(400).json({ message: 'Can not delete an Admin!' });
+                return;
+            }
+            await User.deleteOne({ _id: user._id });
+            res.status(200).json({ message: 'Delete the user' });
+        } else {
+            res.status(404).json({ message: 'Could not find the user' });
+        }
+    } catch (error) {
+        res.status(500).json({ message: 'Could not delete', error: error.message });
+    }
+};
