@@ -2,10 +2,15 @@ import Product from '../models/productModel.js';
 
 export const getProducts = async (req, res) => {
     try {
-        const products = await Product.find({});
-        res.json(products);
+        const keyword = req.query.keyword
+            ? { name: { $regex: req.query.keyword, $options: 'i' } }
+            : {};
+
+        const products = await Product.find({ ...keyword });
+        
+        res.status(200).json(products);
     } catch (error) {
-        res.status(500).json({ message: 'Could not read Server Error', error: error.message });
+        res.status(500).json({ message: 'Could not read the server error', error: error.message });
     }
 };
 
