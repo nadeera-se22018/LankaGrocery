@@ -1,8 +1,9 @@
 import { Link } from 'react-router-dom';
+import Rating from './Rating'; 
 
 const Product = ({ product }) => {
   return (
-    <div className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-xl transition-shadow duration-300">
+    <div className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-xl transition-shadow duration-300 flex flex-col h-full">
       <Link to={`/product/${product._id}`}>
         <img 
           src={product.image} 
@@ -12,18 +13,19 @@ const Product = ({ product }) => {
         />
       </Link>
 
-      <div className="p-4">
+      <div className="p-4 flex flex-col flex-grow">
         <Link to={`/product/${product._id}`}>
-          <h3 className="text-lg font-semibold text-gray-800 hover:text-green-600 truncate">
+          <h3 className="text-lg font-semibold text-gray-800 hover:text-green-600 line-clamp-2 mb-2">
             {product.name}
           </h3>
         </Link>
         
-        <div className="mt-2 flex items-center justify-between">
+        <div className="mb-4">
+          <Rating value={product.rating} text={`${product.numReviews} reviews`} />
+        </div>
+
+        <div className="mt-auto flex items-center justify-between">
           <span className="text-xl font-bold text-green-700">Rs. {product.price.toFixed(2)}</span>
-          <button className="bg-green-600 text-white px-3 py-1 rounded hover:bg-green-700 transition">
-            Add
-          </button>
         </div>
       </div>
     </div>
