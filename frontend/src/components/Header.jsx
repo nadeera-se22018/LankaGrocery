@@ -1,6 +1,7 @@
 import { Link, useNavigate } from 'react-router-dom';
 import useCartStore from '../store/cartStore';
 import useAuthStore from '../store/authStore';
+import SearchBox from './SearchBox';
 
 const Header = () => {
   const navigate = useNavigate();
@@ -20,6 +21,11 @@ const Header = () => {
         <Link to="/" className="text-2xl font-bold tracking-wider">
           🛒 LankaGrocery
         </Link>
+
+        <div className="w-full md:w-auto">
+          <SearchBox />
+        </div>
+
         <nav>
           <ul className="flex space-x-6 items-center">
             <li>
