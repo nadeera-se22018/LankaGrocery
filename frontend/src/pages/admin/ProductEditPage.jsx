@@ -3,6 +3,8 @@ import { Link, useNavigate, useParams } from 'react-router-dom';
 import axios from 'axios';
 import toast from 'react-hot-toast';
 
+const BACKEND_STATIC_ASSETS_URL = 'http://localhost:5000';
+
 const ProductEditPage = () => {
   const { id: productId } = useParams();
   const navigate = useNavigate();
@@ -17,6 +19,7 @@ const ProductEditPage = () => {
 
   const [loading, setLoading] = useState(true);
   const [loadingUpdate, setLoadingUpdate] = useState(false);
+  const [loadingUpload, setLoadingUpload] = useState(false); 
 
   useEffect(() => {
     const fetchProduct = async () => {
@@ -57,6 +60,31 @@ const ProductEditPage = () => {
     } catch (error) {
       toast.error(error.response?.data?.message || 'Could not update');
       setLoadingUpdate(false);
+    }
+  };
+
+  const uploadFileHandler = async (e) => {
+    const file = e.target.files[0]; 
+    if (!file) return;
+
+    const formData = new FormData();
+    formData.append('image', file);
+
+    try {
+      setLoadingUpload(true);
+      const { data } = await axios.post('/api/upload', formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      });
+      toast.success(data.message);
+
+      setImage(`${BACKEND_STATIC_ASSETS_URL}${data.image}`);
+      
+      setLoadingUpload(false);
+    } catch (error) {
+      toast.error(error.response?.data?.message || 'Could not upload the image');
+      setLoadingUpload(false);
     }
   };
 
@@ -108,22 +136,40 @@ const ProductEditPage = () => {
             </div>
           </div>
 
-          <div>
-            <label className="block text-gray-600 font-medium mb-1">Image URL (Unsplash Link)</label>
-            <input 
-              type="text" 
-              value={image}
-              onChange={(e) => setImage(e.target.value)}
-              className="w-full border border-gray-300 rounded px-4 py-2 focus:outline-none focus:border-green-500 focus:ring-1 focus:ring-green-500"
-              placeholder="https://images.unsplash.com/..."
-              required
-            />
-            {image && (
-                <div className="mt-2">
-                    <img src={image} alt="Preview" className="h-32 rounded object-cover shadow-sm" onError={(e) => e.target.style.display='none'} />
-                </div>
-            )}
-          </div>
+          <div className="bg-gray-50/50 p-4 rounded-lg border border-gray-200">
+  <label className="block text-gray-800 font-bold mb-2">Product Image</label>
+  
+  <input 
+    type="text" 
+    value={image}
+    onChange={(e) => setImage(e.target.value)}
+    className="w-full border border-gray-300 rounded px-4 py-2 focus:outline-none focus:border-green-500 focus:ring-1 focus:ring-green-500 mb-3"
+    placeholder="Enter Image URL or Upload below"
+  />
+
+  <input 
+    type="file" 
+    id="image-file" 
+    onChange={uploadFileHandler}
+    className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded file:border-0 file:text-sm file:font-semibold file:bg-green-50 file:text-green-700 hover:file:bg-green-100 transition cursor-pointer"
+    accept="image/png, image/jpeg, image/webp"
+  />
+  {loadingUpload && <p className="text-sm text-green-600 mt-2 animate-pulse font-medium">Uploading image...</p>}
+
+  {image && (
+      <div className="mt-4">
+          <p className="text-xs text-gray-500 mb-1">Preview:</p>
+          <img 
+            src={image.startsWith('http') ? image : `http://localhost:5000${image}`} 
+            alt="Preview" 
+            className="h-32 w-auto rounded-lg object-cover shadow-sm border border-gray-200" 
+            onError={(e) => {
+              e.target.src = 'https://via.placeholder.com/150?text=No+Preview';
+            }} 
+          />
+      </div>
+  )}
+</div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
             <div>
