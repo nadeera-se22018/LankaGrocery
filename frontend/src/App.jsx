@@ -30,6 +30,8 @@ const App = () => {
         <main className="flex-grow container mx-auto px-4 py-6">
           <Routes>
             <Route path="/" element={<HomePage />} />
+            <Route path="/page/:pageNumber" element={<HomePage />} />
+            <Route path="/search/:keyword/page/:pageNumber" element={<HomePage />} />
             <Route path="/search/:keyword" element={<HomePage />} />
             <Route path="/product/:id" element={<ProductPage />} />
             <Route path="/cart" element={<CartPage />} />
