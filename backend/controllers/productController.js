@@ -2,15 +2,25 @@ import Product from '../models/productModel.js';
 
 export const getProducts = async (req, res) => {
     try {
-        const keyword = req.query.keyword
-            ? { name: { $regex: req.query.keyword, $options: 'i' } }
-            : {};
+        const pageSize = 4; 
+        const page = Number(req.query.pageNumber) || 1;
 
-        const products = await Product.find({ ...keyword });
+        const keyword = req.query.keyword ? {
+            name: {
+                $regex: req.query.keyword,
+                $options: 'i', 
+            },
+        } : {};
+
+        const count = await Product.countDocuments({ ...keyword });
         
-        res.status(200).json(products);
+        const products = await Product.find({ ...keyword })
+            .limit(pageSize)
+            .skip(pageSize * (page - 1));
+
+        res.status(200).json({ products, page, pages: Math.ceil(count / pageSize) });
     } catch (error) {
-        res.status(500).json({ message: 'Could not read the server error', error: error.message });
+        res.status(500).json({ message: 'Could not load the product', error: error.message });
     }
 };
 
