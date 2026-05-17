@@ -13,7 +13,7 @@ const ProductListPage = () => {
   const fetchProducts = async () => {
     try {
       const { data } = await axios.get('/api/products');
-      setProducts(data);
+      setProducts(data.products);
       setLoading(false);
     } catch (error) {
       toast.error('Could not load the products');
