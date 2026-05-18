@@ -3,6 +3,7 @@ import { useParams } from 'react-router-dom';
 import axios from 'axios';
 import Product from '../components/Product';
 import Paginate from '../components/Paginate'; 
+import ProductCarousel from '../components/ProductCarousel';
 
 const HomePage = () => {
   const { keyword, pageNumber = 1 } = useParams();
@@ -38,6 +39,14 @@ const HomePage = () => {
 
   return (
     <div>
+      {!keyword ? (
+        <ProductCarousel />
+      ) : (
+        <Link to="/" className="inline-block bg-gray-200 text-gray-800 px-4 py-2 rounded mb-6 hover:bg-gray-300/80 transition font-medium">
+          &larr; Go Back
+        </Link>
+      )}
+
       <h1 className="text-3xl font-bold text-gray-800 mb-6">
         {keyword ? `Search Results for "${keyword}"` : 'Latest Fresh Products 🥬'}
       </h1>
