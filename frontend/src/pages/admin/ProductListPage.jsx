@@ -1,9 +1,14 @@
+import { useParams } from 'react-router-dom';
+import Paginate from '../../components/Paginate';
 import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import toast from 'react-hot-toast';
 
 const ProductListPage = () => {
+  const { pageNumber = 1 } = useParams();
+  const [pages, setPages] = useState(1);
+  const [page, setPage] = useState(1);
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [loadingCreate, setLoadingCreate] = useState(false);
@@ -12,9 +17,14 @@ const ProductListPage = () => {
 
   const fetchProducts = async () => {
     try {
-      const { data } = await axios.get('/api/products');
+      const { data } = await axios.get('/api/products', {
+        params: { pageNumber }
+      });
       setProducts(data.products);
+      setPages(data.pages);
+      setPage(data.page);
       setLoading(false);
+
     } catch (error) {
       toast.error('Could not load the products');
       setLoading(false);
@@ -23,8 +33,8 @@ const ProductListPage = () => {
 
   useEffect(() => {
     fetchProducts();
-  }, []);
-
+  }, [pageNumber]); 
+  
   const deleteHandler = async (id) => {
     if (window.confirm('Are you sure to delete this product?')) {
       try {
@@ -107,6 +117,7 @@ const ProductListPage = () => {
             ))}
           </tbody>
         </table>
+        <Paginate pages={pages} page={page} isAdmin={true} />
       </div>
     </div>
   );
