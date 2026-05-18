@@ -136,3 +136,13 @@ export const createProductReview = async (req, res) => {
         res.status(500).json({ message: 'Could not save the review', error: error.message });
     }
 };
+
+
+export const getTopProducts = async (req, res) => {
+    try {
+        const products = await Product.find({}).sort({ rating: -1 }).limit(3);
+        res.status(200).json(products);
+    } catch (error) {
+        res.status(500).json({ message: 'Could not load top products ', error: error.message });
+    }
+};
