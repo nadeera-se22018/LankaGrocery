@@ -18,6 +18,7 @@ import OrderListPage from './pages/admin/OrderListPage';
 import ProductListPage from './pages/admin/ProductListPage';
 import ProductEditPage from './pages/admin/ProductEditPage';
 import UserListPage from './pages/admin/UserListPage';
+import UserEditPage from './pages/admin/UserEditPage';
 
 const App = () => {
   return (
@@ -51,6 +52,7 @@ const App = () => {
               <Route path="/admin/products" element={<ProductListPage />} />
               <Route path="/admin/product/:id/edit" element={<ProductEditPage />} />
               <Route path="/admin/users" element={<UserListPage />} />
+              <Route path="/admin/user/:id/edit" element={<UserEditPage />} />
             </Route>
             
           </Routes>
