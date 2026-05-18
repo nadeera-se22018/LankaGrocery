@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import axios from 'axios';
 import toast from 'react-hot-toast';
 
@@ -67,9 +68,17 @@ const UserListPage = () => {
                     <span className="text-red-500 font-bold text-xl">⨯</span>
                   )}
                 </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-center">
+                
+                <td className="px-6 py-4 whitespace-nowrap text-sm font-medium flex justify-center space-x-3">
+                  <Link
+                    to={`/admin/user/${user._id}/edit`}
+                    className="bg-blue-100/80 text-blue-700 hover:bg-blue-200 px-3 py-1 rounded transition font-bold"
+                  >
+                    Edit
+                  </Link>
+
                   {!user.isAdmin && (
-                    <button 
+                    <button
                       onClick={() => deleteHandler(user._id)}
                       className="bg-red-100/80 text-red-700 hover:bg-red-200 px-3 py-1 rounded transition font-bold shadow-sm"
                     >
