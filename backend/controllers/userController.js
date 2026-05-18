@@ -120,3 +120,46 @@ export const deleteUser = async (req, res) => {
         res.status(500).json({ message: 'Could not delete', error: error.message });
     }
 };
+
+
+export const getUserById = async (req, res) => {
+    try {
+        const user = await User.findById(req.params.id).select('-password');
+        if (user) {
+            res.status(200).json(user);
+        } else {
+            res.status(404).json({ message: 'Can not find the user' });
+        }
+    } catch (error) {
+        res.status(500).json({ message: 'Could not load the user', error: error.message });
+    }
+};
+
+
+export const updateUser = async (req, res) => {
+    try {
+        const user = await User.findById(req.params.id);
+
+        if (user) {
+            user.name = req.body.name || user.name;
+            user.email = req.body.email || user.email;
+            
+            if (req.body.isAdmin !== undefined) {
+                user.isAdmin = req.body.isAdmin;
+            }
+
+            const updatedUser = await user.save();
+
+            res.status(200).json({
+                _id: updatedUser._id,
+                name: updatedUser.name,
+                email: updatedUser.email,
+                isAdmin: updatedUser.isAdmin,
+            });
+        } else {
+            res.status(404).json({ message: 'Can not find the user' });
+        }
+    } catch (error) {
+        res.status(500).json({ message: 'Could not update the user', error: error.message });
+    }
+};
