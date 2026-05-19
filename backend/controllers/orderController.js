@@ -96,3 +96,28 @@ export const updateOrderToDelivered = async (req, res) => {
         res.status(500).json({ message: 'Could not update the order', error: error.message });
     }
 };
+
+export const updateOrderToPaid = async (req, res) => {
+    try {
+        const order = await Order.findById(req.params.id);
+
+        if (order) {
+            order.isPaid = true;
+            order.paidAt = Date.now();
+            
+            order.paymentResult = {
+                id: req.body.id,
+                status: req.body.status,
+                update_time: req.body.update_time,
+                email_address: req.body.payer.email_address,
+            };
+
+            const updatedOrder = await order.save();
+            res.status(200).json(updatedOrder);
+        } else {
+            res.status(404).json({ message: 'Could not find the order' });
+        }
+    } catch (error) {
+        res.status(500).json({ message: 'Could not update the payment', error: error.message });
+    }
+};
