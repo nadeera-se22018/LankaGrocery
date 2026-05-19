@@ -4,6 +4,7 @@ import axios from 'axios';
 import Product from '../components/Product';
 import Paginate from '../components/Paginate'; 
 import ProductCarousel from '../components/ProductCarousel';
+import Meta from '../components/Meta';
 
 const HomePage = () => {
   const { keyword, pageNumber = 1 } = useParams();
@@ -39,6 +40,8 @@ const HomePage = () => {
 
   return (
     <div>
+      {keyword ? <Meta title={`Search Results for ${keyword}`} /> : <Meta />}
+      
       {!keyword ? (
         <ProductCarousel />
       ) : (
