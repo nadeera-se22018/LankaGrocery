@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { Link, useParams } from 'react-router-dom';
+import { PayPalButtons, usePayPalScriptReducer } from '@paypal/react-paypal-js';
 import axios from 'axios';
 import toast from 'react-hot-toast';
 import useAuthStore from '../store/authStore';
@@ -8,9 +9,10 @@ const OrderPage = () => {
   const { id: orderId } = useParams();
   const [order, setOrder] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [loadingDeliver, setLoadingDeliver] = useState(false); 
+  const [loadingDeliver, setLoadingDeliver] = useState(false);
 
   const { userInfo } = useAuthStore();
+  const [{ isPending }, paypalDispatch] = usePayPalScriptReducer();
 
   const fetchOrder = useCallback(async () => {
     try {
@@ -18,7 +20,7 @@ const OrderPage = () => {
       setOrder(data);
       setLoading(false);
     } catch (error) {
-      toast.error(error.response?.data?.message || 'Order could not load');
+      toast.error(error.response?.data?.message || 'Could not load the order');
       setLoading(false);
     }
   }, [orderId]);
@@ -27,15 +29,69 @@ const OrderPage = () => {
     fetchOrder();
   }, [fetchOrder]);
 
+  useEffect(() => {
+    const loadPayPalScript = async () => {
+      try {
+        const { data } = await axios.get('/api/config/paypal');
+        paypalDispatch({
+          type: 'resetOptions',
+          value: {
+            'client-id': data.clientId,
+            currency: 'USD', 
+          },
+        });
+        paypalDispatch({ type: 'setLoadingStatus', value: 'pending' });
+      } catch (error) {
+        toast.error('Could not load the paypal');
+      }
+    };
+
+    if (order && !order.isPaid) {
+      if (!window.paypal) {
+        loadPayPalScript();
+      }
+    }
+  }, [order, paypalDispatch]);
+
+  const onApprove = async (data, actions) => {
+    return actions.order.capture().then(async function (details) {
+      try {
+        setLoading(true);
+        await axios.put(`/api/orders/${orderId}/pay`, details);
+        fetchOrder();
+        toast.success('Payment successful! 🎉');
+      } catch (error) {
+        toast.error(error?.response?.data?.message || 'Could not update the payment');
+        setLoading(false);
+      }
+    });
+  };
+
+  const onError = (err) => {
+    toast.error(err.message);
+  };
+
+  const createOrder = (data, actions) => {
+    return actions.order.create({
+      purchase_units: [
+        {
+          amount: {
+            value: order.totalPrice,
+          },
+        },
+      ],
+    });
+  };
+
   const deliverOrderHandler = async () => {
     try {
       setLoadingDeliver(true);
       await axios.put(`/api/orders/${orderId}/deliver`);
       toast.success('Order Marked as Delivered! 🚚');
-      fetchOrder(); 
+      fetchOrder();
       setLoadingDeliver(false);
     } catch (error) {
-      toast.error(error.response?.data?.message || 'Could not update');
+      toast.error(error.response?.data?.message || 'Could not Update');
       setLoadingDeliver(false);
     }
   };
@@ -145,6 +201,22 @@ const OrderPage = () => {
                <div className="bg-yellow-50/80 border border-yellow-200 text-yellow-800 p-4 rounded-lg text-center text-sm font-medium">
                  Please pay Rs. {order.totalPrice.toFixed(2)} to the delivery agent.
                </div>
+            )}
+
+            {!order.isPaid && order.paymentMethod === 'Credit/Debit Card' && (
+                <div className="mt-4">
+                    {isPending ? (
+                        <div className="text-center text-gray-500 font-medium">Loading PayPal...</div>
+                    ) : (
+                        <div className="z-0 relative">
+                          <PayPalButtons 
+                            createOrder={createOrder} 
+                            onApprove={onApprove} 
+                            onError={onError} 
+                          />
+                        </div>
+                    )}
+                </div>
             )}
 
             {userInfo && userInfo.isAdmin && !order.isDelivered && (
