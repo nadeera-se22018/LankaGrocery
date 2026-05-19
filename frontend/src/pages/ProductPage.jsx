@@ -5,6 +5,7 @@ import toast from 'react-hot-toast';
 import useCartStore from '../store/cartStore';
 import useAuthStore from '../store/authStore';
 import Rating from '../components/Rating'; 
+import Meta from '../components/Meta';
 
 const ProductPage = () => {
   const { id: productId } = useParams();
@@ -58,6 +59,10 @@ const ProductPage = () => {
       <Link to="/" className="inline-block bg-gray-200 text-gray-800 px-4 py-2 rounded mb-6 hover:bg-gray-300/80 transition font-medium">
         &larr; Back to Shop
       </Link>
+
+      {product.name && (
+        <Meta title={`${product.name} | LankaGrocery`} description={product.description} />
+      )}
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-12">
         
