@@ -1,14 +1,22 @@
 import { Link } from 'react-router-dom';
 
-const Paginate = ({ pages, page, keyword = '', category = '' }) => {
+const Paginate = ({ pages, page, isAdmin = false, keyword = '', category = '' }) => {
   if (pages <= 1) return null;
 
   return (
     <div className="flex justify-center mt-10 space-x-2">
       {[...Array(pages).keys()].map((x) => {
         let link = `/page/${x + 1}`;
-        if (keyword) link = `/search/${keyword}/page/${x + 1}`;
-        if (category) link = `/category/${category}/page/${x + 1}`;
+        
+        if (isAdmin) {
+          link = `/admin/products/${x + 1}`;
+        } 
+        else if (keyword) {
+          link = `/search/${keyword}/page/${x + 1}`;
+        } 
+        else if (category) {
+          link = `/category/${category}/page/${x + 1}`;
+        }
 
         return (
           <Link
