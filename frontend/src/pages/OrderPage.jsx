@@ -75,8 +75,17 @@ const OrderPage = () => {
   };
 
   const createOrder = (data, actions) => {
+    const exchangeRate = 300; 
+    const totalInUSD = (order.totalPrice / exchangeRate).toFixed(2);
+
     return actions.order.create({
-      purchase_units: [{ amount: { value: order.totalPrice } }],
+      purchase_units: [
+        {
+          amount: {
+            value: totalInUSD, 
+          },
+        },
+      ],
     });
   };
 
@@ -214,14 +223,19 @@ const OrderPage = () => {
               </div>
             </div>
             
-            {!order.isPaid && order.paymentMethod === 'Cash on Delivery' && (
+            {!order.isPaid && order.paymentMethod === 'Cash on Delivery' && userInfo._id === order.user._id && (
                <div className="bg-yellow-50/80 border border-yellow-200 text-yellow-800 p-4 rounded-lg text-center text-sm font-medium">
                  Please pay Rs. {order.totalPrice.toFixed(2)} to the delivery agent.
                </div>
             )}
 
-            {!order.isPaid && order.paymentMethod === 'Credit/Debit Card' && (
+            {!order.isPaid && order.paymentMethod === 'Credit/Debit Card' && userInfo._id === order.user._id && (
                 <div className="mt-4">
+                    <div className="bg-blue-50 text-blue-800 p-3 rounded-lg text-sm mb-3 border border-blue-200">
+                      ℹ️ International payments are processed in USD. 
+                      <br/>
+                      <strong>Equivalent Amount: ${(order.totalPrice / 300).toFixed(2)} USD</strong>
+                    </div>
                     {isPending ? (
                         <div className="text-center text-gray-500 font-medium animate-pulse">Loading PayPal...</div>
                     ) : (
@@ -232,7 +246,7 @@ const OrderPage = () => {
                 </div>
             )}
 
-            {!order.isPaid && order.paymentMethod === 'LankaQR' && (
+            {!order.isPaid && order.paymentMethod === 'LankaQR' && userInfo._id === order.user._id && (
                <div className="mt-4 bg-gray-50 border border-gray-200 p-6 rounded-xl text-center shadow-inner">
                  <h3 className="font-bold text-gray-800 mb-2 text-lg">Pay with LankaQR 🇱🇰</h3>
                  <p className="text-xs text-gray-600 mb-4">Scan using ComBank, HNB, BOC or any supported app.</p>
