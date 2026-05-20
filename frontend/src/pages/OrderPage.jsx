@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { PayPalButtons, usePayPalScriptReducer } from '@paypal/react-paypal-js';
+import { QRCode } from 'react-qr-code'; 
 import axios from 'axios';
 import toast from 'react-hot-toast';
 import useAuthStore from '../store/authStore';
@@ -10,6 +11,7 @@ const OrderPage = () => {
   const [order, setOrder] = useState(null);
   const [loading, setLoading] = useState(true);
   const [loadingDeliver, setLoadingDeliver] = useState(false);
+  const [loadingPay, setLoadingPay] = useState(false); 
 
   const { userInfo } = useAuthStore();
   const [{ isPending }, paypalDispatch] = usePayPalScriptReducer();
@@ -42,11 +44,11 @@ const OrderPage = () => {
         });
         paypalDispatch({ type: 'setLoadingStatus', value: 'pending' });
       } catch (error) {
-        toast.error('Could not load the paypal');
+        toast.error('Could not load the PayPal');
       }
     };
 
-    if (order && !order.isPaid) {
+    if (order && !order.isPaid && order.paymentMethod === 'Credit/Debit Card') {
       if (!window.paypal) {
         loadPayPalScript();
       }
@@ -56,13 +58,14 @@ const OrderPage = () => {
   const onApprove = async (data, actions) => {
     return actions.order.capture().then(async function (details) {
       try {
-        setLoading(true);
+        setLoadingPay(true);
         await axios.put(`/api/orders/${orderId}/pay`, details);
         fetchOrder();
         toast.success('Payment successful! 🎉');
+        setLoadingPay(false);
       } catch (error) {
         toast.error(error?.response?.data?.message || 'Could not update the payment');
-        setLoading(false);
+        setLoadingPay(false);
       }
     });
   };
@@ -73,14 +76,28 @@ const OrderPage = () => {
 
   const createOrder = (data, actions) => {
     return actions.order.create({
-      purchase_units: [
-        {
-          amount: {
-            value: order.totalPrice,
-          },
-        },
-      ],
+      purchase_units: [{ amount: { value: order.totalPrice } }],
     });
+  };
+
+  const simulateLankaQRPayment = async () => {
+    try {
+      setLoadingPay(true);
+      const details = {
+        id: `LQR-${Date.now()}`,
+        status: 'COMPLETED',
+        update_time: new Date().toISOString(),
+        payer: { email_address: order.user.email },
+      };
+      
+      await axios.put(`/api/orders/${orderId}/pay`, details);
+      fetchOrder();
+      toast.success('LankaQR Payment Successful! 🇱🇰🎉');
+      setLoadingPay(false);
+    } catch (error) {
+      toast.error('Failed LankaQR payment');
+      setLoadingPay(false);
+    }
   };
 
   const deliverOrderHandler = async () => {
@@ -206,17 +223,40 @@ const OrderPage = () => {
             {!order.isPaid && order.paymentMethod === 'Credit/Debit Card' && (
                 <div className="mt-4">
                     {isPending ? (
-                        <div className="text-center text-gray-500 font-medium">Loading PayPal...</div>
+                        <div className="text-center text-gray-500 font-medium animate-pulse">Loading PayPal...</div>
                     ) : (
                         <div className="z-0 relative">
-                          <PayPalButtons 
-                            createOrder={createOrder} 
-                            onApprove={onApprove} 
-                            onError={onError} 
-                          />
+                          <PayPalButtons createOrder={createOrder} onApprove={onApprove} onError={onError} />
                         </div>
                     )}
                 </div>
+            )}
+
+            {!order.isPaid && order.paymentMethod === 'LankaQR' && (
+               <div className="mt-4 bg-gray-50 border border-gray-200 p-6 rounded-xl text-center shadow-inner">
+                 <h3 className="font-bold text-gray-800 mb-2 text-lg">Pay with LankaQR 🇱🇰</h3>
+                 <p className="text-xs text-gray-600 mb-4">Scan using ComBank, HNB, BOC or any supported app.</p>
+                 
+                 <div className="flex justify-center mb-4 bg-white p-3 rounded-xl inline-block mx-auto border border-gray-300 shadow-sm">
+                    <QRCode 
+                      value={`LANKAQR|MERCHANT:LankaGrocery|ORDER:${order._id}|AMOUNT:${order.totalPrice.toFixed(2)}`} 
+                      size={150} 
+                      level="H" 
+                    />
+                 </div>
+                 
+                 <p className="text-xs text-gray-500 mb-4 italic">
+                   Note: This is a simulated demo. In production, a bank webhook approves this.
+                 </p>
+                 
+                 <button
+                   onClick={simulateLankaQRPayment}
+                   disabled={loadingPay}
+                   className="w-full bg-red-600 hover:bg-red-700 text-white py-2 rounded-lg text-sm font-bold transition shadow-md flex justify-center items-center"
+                 >
+                    {loadingPay ? 'Processing...' : 'Simulate App Scan (Demo)'}
+                 </button>
+               </div>
             )}
 
             {userInfo && userInfo.isAdmin && !order.isDelivered && (
@@ -231,10 +271,8 @@ const OrderPage = () => {
                 </button>
               </div>
             )}
-
           </div>
         </div>
-
       </div>
     </div>
   );
