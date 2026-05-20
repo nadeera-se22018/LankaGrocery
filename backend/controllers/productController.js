@@ -8,19 +8,24 @@ export const getProducts = async (req, res) => {
         const keyword = req.query.keyword ? {
             name: {
                 $regex: req.query.keyword,
-                $options: 'i', 
+                $options: 'i',
             },
         } : {};
 
-        const count = await Product.countDocuments({ ...keyword });
-        
-        const products = await Product.find({ ...keyword })
+        const category = req.query.category ? {
+            category: req.query.category
+        } : {};
+
+        const filter = { ...keyword, ...category };
+
+        const count = await Product.countDocuments(filter);
+        const products = await Product.find(filter)
             .limit(pageSize)
             .skip(pageSize * (page - 1));
 
         res.status(200).json({ products, page, pages: Math.ceil(count / pageSize) });
     } catch (error) {
-        res.status(500).json({ message: 'Could not load the product', error: error.message });
+        res.status(500).json({ message: 'Could not load the products', error: error.message });
     }
 };
 
@@ -144,5 +149,15 @@ export const getTopProducts = async (req, res) => {
         res.status(200).json(products);
     } catch (error) {
         res.status(500).json({ message: 'Could not load top products ', error: error.message });
+    }
+};
+
+
+export const getProductCategories = async (req, res) => {
+    try {
+        const categories = await Product.find().distinct('category');
+        res.status(200).json(categories);
+    } catch (error) {
+        res.status(500).json({ message: 'Could not load the categories', error: error.message });
     }
 };
