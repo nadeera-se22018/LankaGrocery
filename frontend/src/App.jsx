@@ -21,6 +21,7 @@ import UserListPage from './pages/admin/UserListPage';
 import UserEditPage from './pages/admin/UserEditPage';
 import Chatbot from './components/Chatbot';
 import WishlistPage from './pages/WishlistPage';
+import BottomNav from './components/BottomNav';
 
 const App = () => {
   return (
@@ -30,7 +31,7 @@ const App = () => {
 
       <div className="flex flex-col min-h-screen bg-slate-50 text-slate-900 antialiased selection:bg-green-200 selection:text-green-900 font-sans">
         <Header />
-        <main className="grow container mx-auto px-4 py-6">
+        <main className="grow container mx-auto px-4 py-6 pb-20 md:pb-6">
           <Routes>
             <Route path="/" element={<HomePage />} />
             <Route path="/page/:pageNumber" element={<HomePage />} />
@@ -64,6 +65,7 @@ const App = () => {
           </Routes>
         </main>
         <Footer />
+        <BottomNav />
         <Chatbot />
       </div>
     </Router>
