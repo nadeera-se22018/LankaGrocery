@@ -1418,34 +1418,39 @@ const Chatbot = () => {
   };
 
   return (
-    <div className="fixed bottom-6 right-6 z-50">
+    <div className="fixed bottom-24 md:bottom-6 right-4 md:right-6 z-50">
       {isOpen && (
-        <div className="bg-white w-80 sm:w-96 rounded-2xl shadow-2xl border border-gray-200 mb-4 overflow-hidden flex flex-col transition-all duration-300 transform origin-bottom-right">
+        <div className="bg-white/95 backdrop-blur-xl w-80 sm:w-[350px] rounded-3xl premium-shadow border border-slate-200 mb-4 overflow-hidden flex flex-col transition-all duration-300 transform origin-bottom-right">
           
-          <div className="bg-green-600 text-white p-4 flex justify-between items-center shadow-md z-10">
-            <div className="flex items-center space-x-2">
-              <span className="text-2xl">🤖</span>
+          <div className="bg-gradient-premium text-white p-4 flex justify-between items-center shadow-md z-10">
+            <div className="flex items-center space-x-3">
+              <div className="bg-white/20 p-2 rounded-full backdrop-blur-sm">
+                <span className="text-2xl leading-none block">🤖</span>
+              </div>
               <div>
-                <h3 className="font-bold text-lg leading-tight">Lanka Bot</h3>
-                <p className="text-xs text-green-200">Online | Ready to help</p>
+                <h3 className="font-bold text-lg leading-tight tracking-tight">Lanka Bot</h3>
+                <div className="flex items-center space-x-1 mt-0.5">
+                  <div className="w-2 h-2 bg-green-300 rounded-full animate-pulse"></div>
+                  <p className="text-xs text-green-100 font-medium">Online | Ready to help</p>
+                </div>
               </div>
             </div>
             <button 
               onClick={() => setIsOpen(false)}
-              className="text-white hover:text-red-200 transition text-2xl font-bold leading-none pb-1"
+              className="bg-white/10 hover:bg-white/20 w-8 h-8 rounded-full flex items-center justify-center transition-colors text-xl font-bold"
             >
               &times;
             </button>
           </div>
 
-          <div className="h-80 p-4 overflow-y-auto bg-gray-50 flex flex-col space-y-4">
+          <div className="h-96 p-5 overflow-y-auto bg-slate-50 flex flex-col space-y-4">
             {messages.map((msg, index) => (
               <div key={index} className={`flex ${msg.sender === 'user' ? 'justify-end' : 'justify-start'}`}>
                 <div 
-                  className={`max-w-[80%] p-3 rounded-2xl text-sm shadow-sm ${
+                  className={`max-w-[85%] p-3.5 rounded-2xl text-sm shadow-sm ${
                     msg.sender === 'user' 
-                      ? 'bg-green-600 text-white rounded-br-none' 
-                      : 'bg-white text-gray-800 border border-gray-100 rounded-bl-none'
+                      ? 'bg-green-600 text-white rounded-br-sm' 
+                      : 'bg-white text-slate-700 border border-slate-200 rounded-bl-sm font-medium'
                   }`}
                 >
                   {msg.text}
@@ -1455,42 +1460,51 @@ const Chatbot = () => {
             
             {isTyping && (
               <div className="flex justify-start">
-                <div className="bg-white border border-gray-100 p-4 rounded-2xl rounded-bl-none shadow-sm flex space-x-1">
-                  <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"></div>
-                  <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
-                  <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0.4s' }}></div>
+                <div className="bg-white border border-slate-200 py-3 px-4 rounded-2xl rounded-bl-sm shadow-sm flex space-x-1.5 items-center">
+                  <div className="w-1.5 h-1.5 bg-slate-400 rounded-full animate-bounce"></div>
+                  <div className="w-1.5 h-1.5 bg-slate-400 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
+                  <div className="w-1.5 h-1.5 bg-slate-400 rounded-full animate-bounce" style={{ animationDelay: '0.4s' }}></div>
                 </div>
               </div>
             )}
             <div ref={messagesEndRef} />
           </div>
 
-          <form onSubmit={sendMessageHandler} className="p-3 bg-white border-t border-gray-100 flex gap-2">
+          <form onSubmit={sendMessageHandler} className="p-4 bg-white border-t border-slate-100 flex gap-2">
             <input
               type="text"
               value={input}
               onChange={(e) => setInput(e.target.value)}
               placeholder="Ask me anything..."
-              className="flex-grow border border-gray-300 rounded-full px-4 py-2 focus:outline-none focus:border-green-500 focus:ring-1 focus:ring-green-500 text-sm"
+              className="flex-grow bg-slate-50 border border-slate-200 rounded-full px-5 py-2.5 focus:outline-none focus:border-green-500 focus:ring-2 focus:ring-green-500/20 text-sm transition-all"
             />
             <button 
               type="submit"
               disabled={!input.trim() || isTyping}
-              className="bg-green-600 text-white rounded-full w-10 h-10 flex items-center justify-center hover:bg-green-700 transition disabled:bg-gray-400"
+              className="bg-green-600 text-white rounded-full w-11 h-11 flex items-center justify-center hover:bg-green-700 transition-transform active:scale-95 disabled:bg-slate-300 disabled:cursor-not-allowed shadow-md"
             >
-              ➤
+              <svg className="w-5 h-5 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"></path></svg>
             </button>
           </form>
         </div>
       )}
 
       {!isOpen && (
-        <button
-          onClick={() => setIsOpen(true)}
-          className="bg-green-600 text-white p-4 rounded-full shadow-2xl hover:bg-green-700 hover:scale-110 transition duration-300 flex items-center justify-center"
-        >
-          <span className="text-3xl leading-none">🤖</span>
-        </button>
+        <div className="relative group">
+          <div className="absolute bottom-16 right-0 md:right-2 w-48 bg-white text-slate-800 text-sm font-bold px-4 py-3 rounded-2xl premium-shadow border border-slate-100 opacity-0 group-hover:opacity-100 transition-all duration-300 pointer-events-none transform translate-y-2 group-hover:translate-y-0 z-10">
+            Need help? Chat with us 👋
+            <div className="absolute -bottom-2 right-4 w-4 h-4 bg-white border-b border-r border-slate-100 transform rotate-45"></div>
+          </div>
+
+          <div className="absolute inset-0 bg-green-500 rounded-full animate-ping opacity-25"></div>
+          
+          <button
+            onClick={() => setIsOpen(true)}
+            className="relative bg-gradient-premium text-white w-16 h-16 rounded-full premium-shadow hover:shadow-2xl hover:scale-110 transition-all duration-300 flex items-center justify-center z-10 border-4 border-white"
+          >
+            <span className="text-3xl leading-none drop-shadow-md">🤖</span>
+          </button>
+        </div>
       )}
     </div>
   );
