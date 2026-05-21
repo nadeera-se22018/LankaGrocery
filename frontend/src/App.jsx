@@ -27,9 +27,9 @@ const App = () => {
 
       <Toaster position="top-center" reverseOrder={false} />
 
-      <div className="flex flex-col min-h-screen">
+      <div className="flex flex-col min-h-screen bg-slate-50 text-slate-900 antialiased selection:bg-green-200 selection:text-green-900 font-sans">
         <Header />
-        <main className="flex-grow container mx-auto px-4 py-6">
+        <main className="grow container mx-auto px-4 py-6">
           <Routes>
             <Route path="/" element={<HomePage />} />
             <Route path="/page/:pageNumber" element={<HomePage />} />
