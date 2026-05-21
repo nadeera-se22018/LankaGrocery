@@ -132,15 +132,46 @@ const HomePage = () => {
         </div>
       </div>
 
+      {!keyword && !category && (
+        <div className="mb-12 bg-gradient-to-r from-red-600 to-orange-500 rounded-3xl p-6 sm:p-10 text-white flex flex-col md:flex-row items-center justify-between premium-shadow relative overflow-hidden group">
+          <div className="absolute top-0 right-0 -mt-10 -mr-10 w-40 h-40 bg-white opacity-10 rounded-full blur-2xl group-hover:scale-150 transition-transform duration-700"></div>
+          
+          <div className="relative z-10 text-center md:text-left mb-6 md:mb-0">
+            <span className="bg-red-900/40 text-red-50 text-xs font-bold px-4 py-1.5 rounded-full uppercase tracking-widest mb-3 inline-block border border-red-400/30">
+              Weekend Offer
+            </span>
+            <h3 className="text-3xl md:text-4xl font-black mb-2 tracking-tight">Super Flash Sale! ⚡</h3>
+            <p className="text-red-100 font-medium text-lg">Up to 40% off on fresh organic vegetables.</p>
+          </div>
+          
+          <div className="relative z-10 flex items-center space-x-3 bg-red-900/20 p-3 rounded-2xl backdrop-blur-sm border border-red-400/20">
+            <div className="text-right">
+              <span className="block text-xs uppercase tracking-wider font-bold text-red-200">Ends In</span>
+            </div>
+            <div className="bg-white/20 backdrop-blur-md rounded-xl p-2 text-center min-w-[60px]">
+              <div className="text-2xl font-black">12</div>
+              <div className="text-[10px] uppercase font-bold text-red-100">Hrs</div>
+            </div>
+            <div className="text-2xl font-bold animate-pulse">:</div>
+            <div className="bg-white/20 backdrop-blur-md rounded-xl p-2 text-center min-w-[60px]">
+              <div className="text-2xl font-black">45</div>
+              <div className="text-[10px] uppercase font-bold text-red-100">Mins</div>
+            </div>
+          </div>
+        </div>
+      )}
+
       <div className="flex items-center justify-between mb-8">
-        <h1 className="text-3xl font-black text-slate-800 tracking-tight">
-          {keyword ? `Search Results for "${keyword}"` : category ? `${category} Products` : 'Trending Now 🔥'}
+        <h1 className="text-3xl font-black text-slate-800 tracking-tight flex items-center">
+          {keyword ? `Search Results for "${keyword}"` : category ? `${category} Products` : (
+            <>Trending Now <span className="ml-2 text-orange-500">🔥</span></>
+          )}
         </h1>
       </div>
       
       {products.length === 0 ? (
         <div className="bg-yellow-50 text-yellow-800 p-6 rounded-2xl border border-yellow-200 font-bold text-center">
-          No products found in this category.
+          No products found. Check back later!
         </div>
       ) : (
         <>
@@ -151,6 +182,38 @@ const HomePage = () => {
           </div>
           <Paginate pages={pages} page={page} keyword={keyword ? keyword : ''} category={category ? category : ''} />
         </>
+      )}
+
+      {!keyword && !category && (
+        <div className="mt-16 mb-8 grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="bg-white p-6 rounded-2xl border border-slate-100 flex items-center space-x-5 premium-shadow hover:-translate-y-1 transition-transform group">
+            <div className="w-16 h-16 bg-green-50 text-green-600 rounded-2xl flex items-center justify-center text-3xl group-hover:bg-green-600 group-hover:text-white transition-colors duration-300">
+              🚚
+            </div>
+            <div>
+              <h4 className="font-bold text-slate-800 text-lg">Fast Delivery</h4>
+              <p className="text-sm text-slate-500 font-medium">Island-wide quick delivery</p>
+            </div>
+          </div>
+          <div className="bg-white p-6 rounded-2xl border border-slate-100 flex items-center space-x-5 premium-shadow hover:-translate-y-1 transition-transform group">
+            <div className="w-16 h-16 bg-green-50 text-green-600 rounded-2xl flex items-center justify-center text-3xl group-hover:bg-green-600 group-hover:text-white transition-colors duration-300">
+              🥬
+            </div>
+            <div>
+              <h4 className="font-bold text-slate-800 text-lg">100% Fresh</h4>
+              <p className="text-sm text-slate-500 font-medium">Directly from organic farms</p>
+            </div>
+          </div>
+          <div className="bg-white p-6 rounded-2xl border border-slate-100 flex items-center space-x-5 premium-shadow hover:-translate-y-1 transition-transform group">
+            <div className="w-16 h-16 bg-green-50 text-green-600 rounded-2xl flex items-center justify-center text-3xl group-hover:bg-green-600 group-hover:text-white transition-colors duration-300">
+              💳
+            </div>
+            <div>
+              <h4 className="font-bold text-slate-800 text-lg">Secure Payments</h4>
+              <p className="text-sm text-slate-500 font-medium">LankaQR & Safe PayPal</p>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );
