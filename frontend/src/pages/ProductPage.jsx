@@ -30,8 +30,9 @@ const ProductPage = () => {
   };
 
   useEffect(() => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
     fetchProduct();
-  }, [productId]);
+    }, [productId]);
 
   const addToCartHandler = () => {
     addToCart({ ...product, qty });
