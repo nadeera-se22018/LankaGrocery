@@ -26,11 +26,33 @@ import BottomNav from './components/BottomNav';
 const App = () => {
   return (
     <Router>
-
-      <Toaster position="top-center" reverseOrder={false} />
-
-      <div className="flex flex-col min-h-screen bg-slate-50 text-slate-900 antialiased selection:bg-green-200 selection:text-green-900 font-sans">
+      <Toaster 
+        position="top-center" 
+        reverseOrder={false} 
+        toastOptions={{
+          style: {
+            borderRadius: '100px',
+            background: '#ffffff',
+            color: '#1e293b',
+            boxShadow: '0 10px 25px rgba(0,0,0,0.08)', 
+            fontWeight: '600',
+            fontSize: '14px',
+            padding: '12px 24px',
+          },
+          success: {
+            style: { background: '#ecfdf5', color: '#047857', border: '1px solid #10b981' },
+            iconTheme: { primary: '#10b981', secondary: '#fff' },
+          },
+          error: {
+            style: { background: '#fef2f2', color: '#b91c1c', border: '1px solid #ef4444' },
+            iconTheme: { primary: '#ef4444', secondary: '#fff' },
+          },
+        }}
+      />
+      
+      <div className="flex flex-col min-h-screen">
         <Header />
+        
         <main className="flex-grow container mx-auto px-4 py-6 pb-20 md:pb-6 animate-fade-in">
           <Routes>
             <Route path="/" element={<HomePage />} />
