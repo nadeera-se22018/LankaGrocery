@@ -31,7 +31,7 @@ const App = () => {
 
       <div className="flex flex-col min-h-screen bg-slate-50 text-slate-900 antialiased selection:bg-green-200 selection:text-green-900 font-sans">
         <Header />
-        <main className="grow container mx-auto px-4 py-6 pb-20 md:pb-6">
+        <main className="flex-grow container mx-auto px-4 py-6 pb-20 md:pb-6 animate-fade-in">
           <Routes>
             <Route path="/" element={<HomePage />} />
             <Route path="/page/:pageNumber" element={<HomePage />} />
