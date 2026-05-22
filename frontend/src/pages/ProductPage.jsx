@@ -83,6 +83,19 @@ const ProductPage = () => {
              <Rating value={product.rating} text={`${product.numReviews} reviews`} />
           )}
 
+          {product.brand && (
+            <div className="text-sm font-medium text-gray-500">
+              Brand: 
+              <Link 
+                to={`/brand/${product.brand}`} 
+                className="text-green-600 font-bold ml-2 hover:underline transition-all"
+                title={`View all products from ${product.brand}`}
+              >
+                {product.brand}
+              </Link>
+            </div>
+          )}
+
           <hr className="border-gray-200" />
           <p className="text-2xl text-green-700 font-bold">Rs. {product.price?.toFixed(2)}</p>
           <hr className="border-gray-200" />
