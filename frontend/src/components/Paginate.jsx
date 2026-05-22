@@ -1,12 +1,13 @@
 import { Link } from 'react-router-dom';
 
-const Paginate = ({ pages, page, isAdmin = false, keyword = '', category = '' }) => {
+const Paginate = ({ pages, page, isAdmin = false, keyword = '', category = '', brand = '' }) => {
   if (pages <= 1) return null;
 
   const getUrl = (pageNum) => {
     if (isAdmin) return `/admin/products/${pageNum}`;
     if (keyword) return `/search/${keyword}/page/${pageNum}`;
     if (category) return `/category/${category}/page/${pageNum}`;
+    if (brand) return `/brand/${brand}/page/${pageNum}`;
     return `/page/${pageNum}`;
   };
 
