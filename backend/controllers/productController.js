@@ -2,7 +2,7 @@ import Product from '../models/productModel.js';
 
 export const getProducts = async (req, res) => {
     try {
-        const pageSize = 4; 
+        const pageSize = 8; 
         const page = Number(req.query.pageNumber) || 1;
 
         const keyword = req.query.keyword ? {
@@ -16,7 +16,11 @@ export const getProducts = async (req, res) => {
             category: req.query.category
         } : {};
 
-        const filter = { ...keyword, ...category };
+        const brand = req.query.brand ? {
+            brand: req.query.brand
+        } : {};
+
+        const filter = { ...keyword, ...category, ...brand };
 
         const count = await Product.countDocuments(filter);
         const products = await Product.find(filter)
