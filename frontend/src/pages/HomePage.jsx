@@ -6,8 +6,21 @@ import Paginate from '../components/Paginate';
 import ProductCarousel from '../components/ProductCarousel';
 import Meta from '../components/Meta';
 
+const brandsList = [
+  { name: 'Fresh Produce', image: '/images/brands/fresh.webp' },
+  { name: 'Lanka Harvest', image: '/images/brands/harvest.webp' },
+  { name: 'Goviya Products', image: '/images/brands/goviya.webp' },
+  { name: 'Maliban', image: '/images/brands/maliban.webp' },
+  { name: 'Anchor', image: '/images/brands/anchor.webp' },
+  { name: 'Kotmale', image: '/images/brands/kotmale.webp' },
+  { name: 'MD', image: '/images/brands/md.webp' },
+  { name: 'Surf Excel', image: '/images/brands/surfexcel.webp' },
+  { name: 'Bairaha', image: '/images/brands/bairaha.webp' },
+  { name: 'Kandos', image: '/images/brands/kandos.webp' },
+];
+
 const HomePage = () => {
-  const { keyword, pageNumber = 1, category } = useParams();
+  const { keyword, pageNumber = 1, category, brand } = useParams();
   const navigate = useNavigate();
 
   const [products, setProducts] = useState([]);
@@ -33,7 +46,7 @@ const HomePage = () => {
       try {
         setLoading(true);
         const { data } = await axios.get('/api/products', {
-          params: { keyword, pageNumber, category }
+          params: { keyword, pageNumber, category, brand }
         });
         setProducts(data.products);
         setPage(data.page);
@@ -45,13 +58,23 @@ const HomePage = () => {
       }
     };
     fetchProducts();
-  }, [keyword, pageNumber, category]); 
+  }, [keyword, pageNumber, category, brand]); 
 
   const categoryHandler = (catName) => {
     if (category === catName) {
       navigate('/'); 
     } else {
       navigate(`/category/${catName}`);
+    }
+  };
+
+  const brandHandler = (brandName) => {
+    window.scrollTo({ top: 0, behavior: 'smooth'});
+
+    if (brand === brandName) {
+      navigate('/'); 
+    } else {
+      navigate(`/brand/${brandName}`);
     }
   };
 
@@ -73,9 +96,11 @@ const HomePage = () => {
 
   return (
     <div>
-      {keyword ? <Meta title={`Search Results for ${keyword}`} /> : <Meta />}
+      {keyword ? <Meta title={`Search Results for ${keyword}`} /> : 
+       brand ? <Meta title={`${brand} Products`} /> : 
+       category ? <Meta title={`${category} Products`} /> : <Meta />}
 
-      {!keyword && !category ? (
+      {!keyword && !category && !brand ? (
         <ProductCarousel />
       ) : (
         <Link to="/" className="inline-block bg-white border border-slate-200 text-slate-700 px-5 py-2 rounded-full mb-8 hover:bg-slate-50 transition font-bold premium-shadow">
@@ -89,21 +114,20 @@ const HomePage = () => {
         </div>
         
         <div className="flex overflow-x-auto pb-4 gap-5 snap-x [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
-          
           <button 
             onClick={() => navigate('/')}
             className={`snap-start flex-shrink-0 group flex flex-col items-center justify-center min-w-[120px] h-[130px] rounded-3xl transition-all duration-300 border-2 ${
-              !category && !keyword 
+              !category && !keyword && !brand
                 ? 'bg-green-50 border-green-500 premium-shadow scale-105' 
                 : 'bg-white border-transparent hover:border-green-200 hover:-translate-y-1 shadow-sm'
             }`}
           >
             <div className="w-16 h-16 rounded-2xl mb-2.5 overflow-hidden border border-slate-100 group-hover:scale-110 transition-transform duration-300 shadow-inner bg-slate-50 flex items-center justify-center">
-              <svg className={`w-8 h-8 transition-colors duration-300 ${!category && !keyword ? 'text-green-600' : 'text-slate-400 group-hover:text-green-500'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className={`w-8 h-8 transition-colors duration-300 ${!category && !keyword && !brand ? 'text-green-600' : 'text-slate-400 group-hover:text-green-500'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
               </svg>
             </div>
-            <span className={`text-xs font-extrabold tracking-tight ${!category && !keyword ? 'text-green-700' : 'text-slate-700'}`}>All Items</span>
+            <span className={`text-xs font-extrabold tracking-tight ${!category && !keyword && !brand ? 'text-green-700' : 'text-slate-700'}`}>All Items</span>
           </button>
           
           {categories.map((cat, index) => (
@@ -132,7 +156,7 @@ const HomePage = () => {
         </div>
       </div>
 
-      {!keyword && !category && (
+      {!keyword && !category && !brand && (
         <div className="mb-12 bg-gradient-to-r from-red-600 to-orange-500 rounded-3xl p-6 sm:p-10 text-white flex flex-col md:flex-row items-center justify-between premium-shadow relative overflow-hidden group">
           <div className="absolute top-0 right-0 -mt-10 -mr-10 w-40 h-40 bg-white opacity-10 rounded-full blur-2xl group-hover:scale-150 transition-transform duration-700"></div>
           
@@ -163,7 +187,9 @@ const HomePage = () => {
 
       <div className="flex items-center justify-between mb-8">
         <h1 className="text-3xl font-black text-slate-800 tracking-tight flex items-center">
-          {keyword ? `Search Results for "${keyword}"` : category ? `${category} Products` : (
+          {keyword ? `Search Results for "${keyword}"` : 
+           category ? `${category} Products` : 
+           brand ? `${brand} Products` : (
             <>Trending Now <span className="ml-2 text-orange-500">🔥</span></>
           )}
         </h1>
@@ -180,12 +206,47 @@ const HomePage = () => {
               <Product key={product._id} product={product} />
             ))}
           </div>
-          <Paginate pages={pages} page={page} keyword={keyword ? keyword : ''} category={category ? category : ''} />
+          <Paginate pages={pages} page={page} keyword={keyword ? keyword : ''} category={category ? category : ''} brand={brand ? brand : ''} />
         </>
       )}
 
-      {!keyword && !category && (
-        <div className="mt-16 mb-8 grid grid-cols-1 md:grid-cols-3 gap-6">
+      {!keyword && !category && !brand && (
+        <div className="mt-20 mb-12">
+          <div className="text-center mb-10 flex flex-col items-center">
+            <h2 className="text-3xl font-black text-slate-800 tracking-tight mb-2">Shop by Brand</h2>
+            <div className="h-1 w-20 bg-green-500 rounded-full"></div>
+          </div>
+          
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6 sm:gap-8 justify-items-center">
+            {brandsList.map((item, index) => (
+              <div 
+                key={index} 
+                onClick={() => brandHandler(item.name)} 
+                className="flex flex-col items-center group cursor-pointer"
+              >
+                <div className={`w-24 h-24 sm:w-28 sm:h-28 bg-white rounded-full flex items-center justify-center border transition-all duration-300 overflow-hidden p-5 mb-3 ${
+                  brand === item.name 
+                    ? 'border-green-500 premium-shadow scale-105' 
+                    : 'border-slate-100 premium-shadow group-hover:-translate-y-2 group-hover:shadow-lg'
+                }`}>
+                  <img 
+                    src={item.image} 
+                    alt={item.name} 
+                    className="w-full h-full object-contain mix-blend-multiply opacity-80 group-hover:opacity-100 transition-opacity"
+                    onError={(e) => e.target.src = `https://via.placeholder.com/150?text=${item.name}`}
+                  />
+                </div>
+                <span className={`text-sm font-bold transition-colors text-center ${brand === item.name ? 'text-green-600' : 'text-slate-600 group-hover:text-green-600'}`}>
+                  {item.name}
+                </span>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {!keyword && !category && !brand && (
+        <div className="mt-20 mb-8 grid grid-cols-1 md:grid-cols-3 gap-6">
           <div className="bg-white p-6 rounded-2xl border border-slate-100 flex items-center space-x-5 premium-shadow hover:-translate-y-1 transition-transform group">
             <div className="w-16 h-16 bg-green-50 text-green-600 rounded-2xl flex items-center justify-center text-3xl group-hover:bg-green-600 group-hover:text-white transition-colors duration-300">
               🚚
