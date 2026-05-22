@@ -43,6 +43,7 @@ const Product = ({ product }) => {
         <img 
           src={product.image} 
           alt={product.name} 
+          loading="lazy"
           className="object-cover h-full w-full group-hover:scale-110 transition-transform duration-500"
           onError={(e) => e.target.src = 'https://via.placeholder.com/300?text=Lanka+Grocery'}
         />
