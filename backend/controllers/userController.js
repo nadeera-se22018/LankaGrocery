@@ -1,10 +1,10 @@
+import { OAuth2Client } from 'google-auth-library';
 import User from '../models/userModel.js';
 import generateToken from '../utils/generateToken.js';
 
 export const authUser = async (req, res) => {
     try {
         const { email, password } = req.body;
-
         const user = await User.findOne({ email });
 
         if (user && (await user.matchPassword(password))) {
@@ -25,11 +25,9 @@ export const authUser = async (req, res) => {
     }
 };
 
-
 export const registerUser = async (req, res) => {
     try {
         const { name, email, password } = req.body;
-
         const userExists = await User.findOne({ email });
 
         if (userExists) {
@@ -61,7 +59,6 @@ export const registerUser = async (req, res) => {
     }
 };
 
-
 export const updateUserProfile = async (req, res) => {
     try {
         const user = await User.findById(req.user._id);
@@ -87,8 +84,6 @@ export const updateUserProfile = async (req, res) => {
             res.status(404).json({ message: 'Could not find user.' });
         }
     } catch (error) {
-        console.error("PROFILE UPDATE ERROR:", error); 
-        
         res.status(500).json({ message: 'Could not update the profile.', error: error.message });
     }
 };
@@ -121,7 +116,6 @@ export const deleteUser = async (req, res) => {
     }
 };
 
-
 export const getUserById = async (req, res) => {
     try {
         const user = await User.findById(req.params.id).select('-password');
@@ -134,7 +128,6 @@ export const getUserById = async (req, res) => {
         res.status(500).json({ message: 'Could not load the user', error: error.message });
     }
 };
-
 
 export const updateUser = async (req, res) => {
     try {
@@ -161,5 +154,43 @@ export const updateUser = async (req, res) => {
         }
     } catch (error) {
         res.status(500).json({ message: 'Could not update the user', error: error.message });
+    }
+};
+
+export const googleAuth = async (req, res) => {
+    try {
+        const { credential } = req.body;
+        
+        const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
+        
+        const ticket = await client.verifyIdToken({
+            idToken: credential,
+            audience: process.env.GOOGLE_CLIENT_ID,
+        });
+        
+        const { name, email } = ticket.getPayload();
+
+        let user = await User.findOne({ email });
+
+        if (!user) {
+            const generatedPassword = Math.random().toString(36).slice(-8) + Math.random().toString(36).slice(-8);
+            user = await User.create({
+                name,
+                email,
+                password: generatedPassword,
+            });
+        }
+
+        generateToken(res, user._id);
+
+        res.status(200).json({
+            _id: user._id,
+            name: user.name,
+            email: user.email,
+            isAdmin: user.isAdmin,
+        });
+
+    } catch (error) {
+        res.status(401).json({ message: 'Google authentication failed', error: error.message });
     }
 };
