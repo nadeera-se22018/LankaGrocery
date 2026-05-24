@@ -2,7 +2,7 @@
   "rewrites": [
     {
       "source": "/api/(.*)",
-      "destination": "https://obage-render-link-eka.onrender.com/api/$1"
+      "destination": "https://lanka-grocery-backend.vercel.app/api/$1"
     },
     {
       "source": "/(.*)",
