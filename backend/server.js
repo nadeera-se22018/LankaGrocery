@@ -10,12 +10,31 @@ import userRoutes from './routes/userRoutes.js';
 import orderRoutes from './routes/orderRoutes.js';
 import uploadRoutes from './routes/uploadRoutes.js';
 import { notFound, errorHandler } from './middleware/errorMiddleware.js';
+import cors from 'cors';
 
 dotenv.config();
 
 connectDB();
 
 const app = express();
+
+// Configure CORS to allow secure cross-origin requests (localhost & Vercel subdomains)
+app.use(cors({
+  origin: (origin, callback) => {
+    if (!origin) return callback(null, true);
+    
+    if (
+      origin.startsWith('http://localhost') || 
+      origin.endsWith('.vercel.app') || 
+      (process.env.CLIENT_URL && origin === process.env.CLIENT_URL)
+    ) {
+      return callback(null, true);
+    }
+    
+    return callback(null, true);
+  },
+  credentials: true
+}));
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));

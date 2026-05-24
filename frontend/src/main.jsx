@@ -8,7 +8,7 @@ import { GoogleOAuthProvider } from '@react-oauth/google';
 import axios from 'axios';
 
 // Set global Axios defaults for remote backend deployment
-axios.defaults.baseURL = import.meta.env.VITE_API_URL || 'https://lanka-grocery-backend.vercel.app';
+axios.defaults.baseURL = import.meta.env.VITE_API_URL || '';
 axios.defaults.withCredentials = true;
 
 ReactDOM.createRoot(document.getElementById('root')).render(
