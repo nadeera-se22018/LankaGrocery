@@ -6,6 +6,7 @@ import useCartStore from '../store/cartStore';
 import useAuthStore from '../store/authStore';
 import Rating from '../components/Rating'; 
 import Meta from '../components/Meta';
+import { getImageUrl } from '../utils/imageUtil';
 
 const ProductPage = () => {
   const { id: productId } = useParams();
@@ -69,7 +70,7 @@ const ProductPage = () => {
         
         <div className="md:col-span-1">
           <img 
-            src={product.image} 
+            src={getImageUrl(product.image)} 
             alt={product.name} 
             className="w-full h-auto object-cover rounded-lg shadow-md"
             onError={(e) => e.target.src = 'https://via.placeholder.com/400?text=Lanka+Grocery'}

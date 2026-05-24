@@ -3,6 +3,7 @@ import Rating from './Rating';
 import useCartStore from '../store/cartStore';
 import useWishlistStore from '../store/wishlistStore'; // Wishlist එකත් import කරගත්තා
 import toast from 'react-hot-toast';
+import { getImageUrl } from '../utils/imageUtil';
 
 const Product = ({ product }) => {
   const addToCart = useCartStore((state) => state.addToCart);
@@ -41,7 +42,7 @@ const Product = ({ product }) => {
       
       <Link to={`/product/${product._id}`} className="relative h-48 rounded-xl overflow-hidden mb-4 bg-slate-50 flex items-center justify-center">
         <img 
-          src={product.image} 
+          src={getImageUrl(product.image)} 
           alt={product.name} 
           loading="lazy"
           className="object-cover h-full w-full group-hover:scale-110 transition-transform duration-500"

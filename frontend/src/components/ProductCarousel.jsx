@@ -4,6 +4,7 @@ import { Carousel } from 'react-responsive-carousel';
 import "react-responsive-carousel/lib/styles/carousel.min.css"; 
 import axios from 'axios';
 import toast from 'react-hot-toast';
+import { getImageUrl } from '../utils/imageUtil';
 
 const ProductCarousel = () => {
   const [products, setProducts] = useState([]);
@@ -42,7 +43,7 @@ const ProductCarousel = () => {
           <div key={product._id} className="relative h-72 sm:h-96 md:h-[450px] w-full bg-slate-100">
             
             <img 
-              src={product.image} 
+              src={getImageUrl(product.image)} 
               alt={product.name} 
               className="w-full h-full object-cover object-center"
               onError={(e) => e.target.src = 'https://via.placeholder.com/1200x500?text=Lanka+Grocery'}
