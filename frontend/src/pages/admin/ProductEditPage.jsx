@@ -20,7 +20,7 @@ const ProductEditPage = () => {
 
   const [loading, setLoading] = useState(true);
   const [loadingUpdate, setLoadingUpdate] = useState(false);
-  const [loadingUpload, setLoadingUpload] = useState(false); 
+  const [loadingUpload, setLoadingUpload] = useState(false);
 
   useEffect(() => {
     const fetchProduct = async () => {
@@ -57,7 +57,7 @@ const ProductEditPage = () => {
       });
       toast.success('Product updated successfully! ✅');
       setLoadingUpdate(false);
-      navigate('/admin/products'); 
+      navigate('/admin/products');
     } catch (error) {
       toast.error(error.response?.data?.message || 'Could not update');
       setLoadingUpdate(false);
@@ -65,7 +65,7 @@ const ProductEditPage = () => {
   };
 
   const uploadFileHandler = async (e) => {
-    const file = e.target.files[0]; 
+    const file = e.target.files[0];
     if (!file) return;
 
     const formData = new FormData();
@@ -84,20 +84,53 @@ const ProductEditPage = () => {
       setImage(data.image);
       setLoadingUpload(false);
     } catch (error) {
-      console.warn('Backend upload failed, falling back to client-side Base64 reader:', error);
-      
-      // Fallback: Read file locally as Base64/DataURL
+      console.warn('Backend upload failed, falling back to client-side Base64 reader with canvas compression:', error);
+
+      // Fallback: Read, resize, and compress the file locally to keep Base64 payload minimal (<100KB)
       const reader = new FileReader();
-      reader.onload = () => {
-        setImage(reader.result);
-        toast.success('Image loaded successfully as Base64 fallback (Production/Serverless Mode) ✅');
-        setLoadingUpload(false);
+      reader.readAsDataURL(file);
+      reader.onload = (event) => {
+        const img = new Image();
+        img.src = event.target.result;
+        img.onload = () => {
+          const canvas = document.createElement('canvas');
+          const MAX_WIDTH = 800;
+          const MAX_HEIGHT = 800;
+          let width = img.width;
+          let height = img.height;
+
+          if (width > height) {
+            if (width > MAX_WIDTH) {
+              height = Math.round((height * MAX_WIDTH) / width);
+              width = MAX_WIDTH;
+            }
+          } else {
+            if (height > MAX_HEIGHT) {
+              width = Math.round((width * MAX_HEIGHT) / height);
+              height = MAX_HEIGHT;
+            }
+          }
+
+          canvas.width = width;
+          canvas.height = height;
+
+          const ctx = canvas.getContext('2d');
+          ctx.drawImage(img, 0, 0, width, height);
+
+          const compressedBase64 = canvas.toDataURL('image/jpeg', 0.7);
+          setImage(compressedBase64);
+          toast.success('Image compressed and loaded successfully as Base64 fallback (Offline/Production Mode) ✅');
+          setLoadingUpload(false);
+        };
+        img.onerror = () => {
+          toast.error('Could not process the image locally');
+          setLoadingUpload(false);
+        };
       };
       reader.onerror = () => {
-        toast.error('Could not upload or read the image file');
+        toast.error('Could not read the image file');
         setLoadingUpload(false);
       };
-      reader.readAsDataURL(file);
     }
   };
 
@@ -113,12 +146,12 @@ const ProductEditPage = () => {
 
       <div className="bg-white p-8 rounded-xl shadow-md border border-gray-100">
         <h1 className="text-3xl font-bold text-gray-800 mb-6 border-b pb-4">Edit Product ✏️</h1>
-        
+
         <form onSubmit={submitHandler} className="space-y-5">
           <div>
             <label className="block text-gray-600 font-medium mb-1">Name</label>
-            <input 
-              type="text" 
+            <input
+              type="text"
               value={name}
               onChange={(e) => setName(e.target.value)}
               className="w-full border border-gray-300 rounded px-4 py-2 focus:outline-none focus:border-green-500 focus:ring-1 focus:ring-green-500"
@@ -129,8 +162,8 @@ const ProductEditPage = () => {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
             <div>
               <label className="block text-gray-600 font-medium mb-1">Price (Rs)</label>
-              <input 
-                type="number" 
+              <input
+                type="number"
                 value={price}
                 onChange={(e) => setPrice(Number(e.target.value))}
                 className="w-full border border-gray-300 rounded px-4 py-2 focus:outline-none focus:border-green-500 focus:ring-1 focus:ring-green-500"
@@ -139,8 +172,8 @@ const ProductEditPage = () => {
             </div>
             <div>
               <label className="block text-gray-600 font-medium mb-1">Stock Count</label>
-              <input 
-                type="number" 
+              <input
+                type="number"
                 value={countInStock}
                 onChange={(e) => setCountInStock(Number(e.target.value))}
                 className="w-full border border-gray-300 rounded px-4 py-2 focus:outline-none focus:border-green-500 focus:ring-1 focus:ring-green-500"
@@ -150,45 +183,45 @@ const ProductEditPage = () => {
           </div>
 
           <div className="bg-gray-50/50 p-4 rounded-lg border border-gray-200">
-  <label className="block text-gray-800 font-bold mb-2">Product Image</label>
-  
-  <input 
-    type="text" 
-    value={image}
-    onChange={(e) => setImage(e.target.value)}
-    className="w-full border border-gray-300 rounded px-4 py-2 focus:outline-none focus:border-green-500 focus:ring-1 focus:ring-green-500 mb-3"
-    placeholder="Enter Image URL or Upload below"
-  />
+            <label className="block text-gray-800 font-bold mb-2">Product Image</label>
 
-  <input 
-    type="file" 
-    id="image-file" 
-    onChange={uploadFileHandler}
-    className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded file:border-0 file:text-sm file:font-semibold file:bg-green-50 file:text-green-700 hover:file:bg-green-100 transition cursor-pointer"
-    accept="image/png, image/jpeg, image/webp"
-  />
-  {loadingUpload && <p className="text-sm text-green-600 mt-2 animate-pulse font-medium">Uploading image...</p>}
+            <input
+              type="text"
+              value={image}
+              onChange={(e) => setImage(e.target.value)}
+              className="w-full border border-gray-300 rounded px-4 py-2 focus:outline-none focus:border-green-500 focus:ring-1 focus:ring-green-500 mb-3"
+              placeholder="Enter Image URL or Upload below"
+            />
 
-  {image && (
-      <div className="mt-4">
-          <p className="text-xs text-gray-500 mb-1">Preview:</p>
-          <img 
-            src={getImageUrl(image)} 
-            alt="Preview" 
-            className="h-32 w-auto rounded-lg object-cover shadow-sm border border-gray-200" 
-            onError={(e) => {
-              e.target.src = 'https://via.placeholder.com/150?text=No+Preview';
-            }} 
-          />
-      </div>
-  )}
-</div>
+            <input
+              type="file"
+              id="image-file"
+              onChange={uploadFileHandler}
+              className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded file:border-0 file:text-sm file:font-semibold file:bg-green-50 file:text-green-700 hover:file:bg-green-100 transition cursor-pointer"
+              accept="image/png, image/jpeg, image/webp"
+            />
+            {loadingUpload && <p className="text-sm text-green-600 mt-2 animate-pulse font-medium">Uploading image...</p>}
+
+            {image && (
+              <div className="mt-4">
+                <p className="text-xs text-gray-500 mb-1">Preview:</p>
+                <img
+                  src={getImageUrl(image)}
+                  alt="Preview"
+                  className="h-32 w-auto rounded-lg object-cover shadow-sm border border-gray-200"
+                  onError={(e) => {
+                    e.target.src = 'https://via.placeholder.com/150?text=No+Preview';
+                  }}
+                />
+              </div>
+            )}
+          </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
             <div>
               <label className="block text-gray-600 font-medium mb-1">Brand</label>
-              <input 
-                type="text" 
+              <input
+                type="text"
                 value={brand}
                 onChange={(e) => setBrand(e.target.value)}
                 className="w-full border border-gray-300 rounded px-4 py-2 focus:outline-none focus:border-green-500 focus:ring-1 focus:ring-green-500"
@@ -197,8 +230,8 @@ const ProductEditPage = () => {
             </div>
             <div>
               <label className="block text-gray-600 font-medium mb-1">Category</label>
-              <input 
-                type="text" 
+              <input
+                type="text"
                 value={category}
                 onChange={(e) => setCategory(e.target.value)}
                 className="w-full border border-gray-300 rounded px-4 py-2 focus:outline-none focus:border-green-500 focus:ring-1 focus:ring-green-500"
@@ -209,7 +242,7 @@ const ProductEditPage = () => {
 
           <div>
             <label className="block text-gray-600 font-medium mb-1">Description</label>
-            <textarea 
+            <textarea
               value={description}
               onChange={(e) => setDescription(e.target.value)}
               rows="4"
@@ -218,8 +251,8 @@ const ProductEditPage = () => {
             ></textarea>
           </div>
 
-          <button 
-            type="submit" 
+          <button
+            type="submit"
             disabled={loadingUpdate}
             className="w-full bg-green-600 text-white font-bold py-3 rounded hover:bg-green-700/90 transition shadow-md mt-4"
           >
