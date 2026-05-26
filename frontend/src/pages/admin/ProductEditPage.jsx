@@ -94,8 +94,8 @@ const ProductEditPage = () => {
         img.src = event.target.result;
         img.onload = () => {
           const canvas = document.createElement('canvas');
-          const MAX_WIDTH = 800;
-          const MAX_HEIGHT = 800;
+          const MAX_WIDTH = 1920;
+          const MAX_HEIGHT = 1920;
           let width = img.width;
           let height = img.height;
 
@@ -117,9 +117,10 @@ const ProductEditPage = () => {
           const ctx = canvas.getContext('2d');
           ctx.drawImage(img, 0, 0, width, height);
 
-          const compressedBase64 = canvas.toDataURL('image/jpeg', 0.7);
+          // Use 0.88 quality and 1920px dimensions for high-resolution banner layouts without artifacts
+          const compressedBase64 = canvas.toDataURL('image/jpeg', 0.88);
           setImage(compressedBase64);
-          toast.success('Image compressed and loaded successfully as Base64 fallback (Offline/Production Mode) ✅');
+          toast.success('High-quality image loaded successfully as Base64 fallback (Offline/Production Mode) ✅');
           setLoadingUpload(false);
         };
         img.onerror = () => {
