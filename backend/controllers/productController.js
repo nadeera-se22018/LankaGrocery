@@ -165,3 +165,12 @@ export const getProductCategories = async (req, res) => {
         res.status(500).json({ message: 'Could not load the categories', error: error.message });
     }
 };
+
+export const getProductBrands = async (req, res) => {
+    try {
+        const brands = await Product.find().distinct('brand');
+        res.status(200).json(brands);
+    } catch (error) {
+        res.status(500).json({ message: 'Could not load the brands', error: error.message });
+    }
+};
