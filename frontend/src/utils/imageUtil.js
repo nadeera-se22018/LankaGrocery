@@ -11,6 +11,11 @@ export const getImageUrl = (imagePath) => {
     return 'https://via.placeholder.com/300?text=Lanka+Grocery';
   }
 
+  // If it's a base64 data URL, return it directly
+  if (imagePath.startsWith('data:')) {
+    return imagePath;
+  }
+
   // If it's an external HTTP/HTTPS URL (e.g., Unsplash) but not localhost:5000
   if (imagePath.startsWith('http') && !imagePath.includes('localhost:5000')) {
     return imagePath;

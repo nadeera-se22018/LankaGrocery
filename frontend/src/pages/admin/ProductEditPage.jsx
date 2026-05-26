@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import axios from 'axios';
 import toast from 'react-hot-toast';
+import { getImageUrl } from '../../utils/imageUtil';
 
 const BACKEND_STATIC_ASSETS_URL = 'http://localhost:5000';
 
@@ -79,12 +80,24 @@ const ProductEditPage = () => {
       });
       toast.success(data.message);
 
-      setImage(`${BACKEND_STATIC_ASSETS_URL}${data.image}`);
-      
+      // If backend successfully uploaded it, save the returned relative path
+      setImage(data.image);
       setLoadingUpload(false);
     } catch (error) {
-      toast.error(error.response?.data?.message || 'Could not upload the image');
-      setLoadingUpload(false);
+      console.warn('Backend upload failed, falling back to client-side Base64 reader:', error);
+      
+      // Fallback: Read file locally as Base64/DataURL
+      const reader = new FileReader();
+      reader.onload = () => {
+        setImage(reader.result);
+        toast.success('Image loaded successfully as Base64 fallback (Production/Serverless Mode) ✅');
+        setLoadingUpload(false);
+      };
+      reader.onerror = () => {
+        toast.error('Could not upload or read the image file');
+        setLoadingUpload(false);
+      };
+      reader.readAsDataURL(file);
     }
   };
 
@@ -160,7 +173,7 @@ const ProductEditPage = () => {
       <div className="mt-4">
           <p className="text-xs text-gray-500 mb-1">Preview:</p>
           <img 
-            src={image.startsWith('http') ? image : `http://localhost:5000${image}`} 
+            src={getImageUrl(image)} 
             alt="Preview" 
             className="h-32 w-auto rounded-lg object-cover shadow-sm border border-gray-200" 
             onError={(e) => {
