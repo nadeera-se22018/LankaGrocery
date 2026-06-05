@@ -6,7 +6,7 @@ A full-stack, modern online grocery shopping web application tailored for the Sr
 * **Frontend:** React (Vite), Tailwind CSS, Zustand/Redux
 * **Backend:** Node.js, Express.js, JWT Authentication
 * **Database:** MongoDB, Mongoose
-* **Tools:** Cloudinary (Image handling), Stripe/LankaQR (Payments)
+* **Tools:** Cloudinary (Image handling), PayPal/LankaQR (Payments)
 
 ## 📁 Project Structure
 The project is strictly divided into two main directories:
