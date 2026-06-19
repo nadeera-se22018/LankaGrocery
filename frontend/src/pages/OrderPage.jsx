@@ -1,31 +1,85 @@
 import { useState, useEffect, useCallback } from 'react';
-import { Link, useParams } from 'react-router-dom';
+import { Link, useParams, useNavigate } from 'react-router-dom';
 import { PayPalButtons, usePayPalScriptReducer } from '@paypal/react-paypal-js';
 import { QRCode } from 'react-qr-code'; 
 import axios from 'axios';
 import toast from 'react-hot-toast';
 import useAuthStore from '../store/authStore';
+import useCartStore from '../store/cartStore';
+
+const CountdownTimer = ({ order, onExpire }) => {
+  const [timeLeft, setTimeLeft] = useState('');
+
+  useEffect(() => {
+    const calculateTime = () => {
+      const difference = new Date(order.createdAt).getTime() + 30 * 60 * 1000 - Date.now();
+      if (difference <= 0) {
+        setTimeLeft('00:00');
+        onExpire(order._id);
+        return false;
+      }
+      const mins = Math.floor((difference / 1000 / 60) % 60);
+      const secs = Math.floor((difference / 1000) % 60);
+      setTimeLeft(`${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`);
+      return true;
+    };
+
+    const active = calculateTime();
+    if (!active) return;
+
+    const timer = setInterval(() => {
+      const active = calculateTime();
+      if (!active) {
+        clearInterval(timer);
+      }
+    }, 1000);
+
+    return () => clearInterval(timer);
+  }, [order, onExpire]);
+
+  return <span>{timeLeft}</span>;
+};
 
 const OrderPage = () => {
   const { id: orderId } = useParams();
+  const navigate = useNavigate();
   const [order, setOrder] = useState(null);
   const [loading, setLoading] = useState(true);
   const [loadingDeliver, setLoadingDeliver] = useState(false);
   const [loadingPay, setLoadingPay] = useState(false); 
 
   const { userInfo } = useAuthStore();
+  const { addToCart } = useCartStore();
   const [{ isPending }, paypalDispatch] = usePayPalScriptReducer();
 
   const fetchOrder = useCallback(async () => {
     try {
       const { data } = await axios.get(`/api/orders/${orderId}`);
+      if (!data.isPaid && data.paymentMethod !== 'Cash on Delivery') {
+        const difference = new Date(data.createdAt).getTime() + 30 * 60 * 1000 - Date.now();
+        if (difference <= 0) {
+          try {
+            const { data: expiredData } = await axios.put(`/api/orders/${orderId}/expire`);
+            if (expiredData.items && expiredData.items.length > 0) {
+              expiredData.items.forEach(item => {
+                addToCart(item);
+              });
+            }
+            toast.error('Order has expired. Items returned to cart.');
+            navigate('/cart');
+            return;
+          } catch (err) {
+            console.log("Error expiring order on mount: " + err.message);
+          }
+        }
+      }
       setOrder(data);
       setLoading(false);
     } catch (error) {
       toast.error(error.response?.data?.message || 'Could not load the order');
       setLoading(false);
     }
-  }, [orderId]);
+  }, [orderId, navigate, addToCart]);
 
   useEffect(() => {
     fetchOrder();
@@ -135,6 +189,36 @@ const OrderPage = () => {
       <h1 className="text-2xl font-bold text-gray-800 mb-6 truncate">
         Order ID: <span className="text-gray-500 font-medium text-xl">{order._id}</span>
       </h1>
+
+      {!order.isPaid && order.paymentMethod !== 'Cash on Delivery' && (
+        <div className="bg-amber-50 border-l-4 border-amber-500 p-4 rounded-r-xl shadow-sm mb-6 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+          <div className="flex items-center space-x-3">
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-amber-600 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            <div>
+              <p className="font-bold text-amber-800 text-base">Payment Window Active</p>
+              <p className="text-sm text-amber-700">Please complete your payment before the timer expires. Otherwise, this order will be cancelled and items will return to your cart.</p>
+            </div>
+          </div>
+          <div className="bg-amber-500 text-white font-extrabold px-5 py-2.5 rounded-lg text-xl flex items-center justify-center min-w-[110px] shadow border border-amber-400">
+            <CountdownTimer order={order} onExpire={async (id) => {
+              try {
+                const { data } = await axios.put(`/api/orders/${id}/expire`);
+                if (data.items && data.items.length > 0) {
+                  data.items.forEach(item => {
+                    addToCart(item);
+                  });
+                }
+                toast.error('Order expired. Items returned to cart.');
+                navigate('/cart');
+              } catch (err) {
+                console.log("Error expiring order in countdown: " + err.message);
+              }
+            }} />
+          </div>
+        </div>
+      )}
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         
