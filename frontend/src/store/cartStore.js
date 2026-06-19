@@ -1,6 +1,7 @@
 import { create } from 'zustand';
+import axios from 'axios';
 
-const useCartStore = create((set) => ({
+const useCartStore = create((set, get) => ({
     cartItems: localStorage.getItem('cartItems') ? JSON.parse(localStorage.getItem('cartItems')) : [],
 
     shippingAddress: localStorage.getItem('shippingAddress') ? JSON.parse(localStorage.getItem('shippingAddress')) : {},
@@ -42,7 +43,44 @@ const useCartStore = create((set) => ({
     clearCartItems: () => set(() => {
         localStorage.removeItem('cartItems');
         return { cartItems: [] };
-    })
+    }),
+
+    syncCart: async () => {
+        const cartItems = get().cartItems;
+        if (!cartItems || cartItems.length === 0) return;
+        try {
+            const promises = cartItems.map((item) => axios.get(`/api/products/${item._id}`));
+            const responses = await Promise.all(promises);
+            
+            let changed = false;
+            const newCartItems = cartItems.map((item, index) => {
+                const latest = responses[index].data;
+                if (
+                    item.price !== latest.price ||
+                    item.countInStock !== latest.countInStock ||
+                    item.name !== latest.name ||
+                    item.image !== latest.image
+                ) {
+                    changed = true;
+                    return {
+                        ...item,
+                        price: latest.price,
+                        countInStock: latest.countInStock,
+                        name: latest.name,
+                        image: latest.image,
+                    };
+                }
+                return item;
+            });
+
+            if (changed) {
+                localStorage.setItem('cartItems', JSON.stringify(newCartItems));
+                set({ cartItems: newCartItems });
+            }
+        } catch (error) {
+            console.log("Error syncing cart: " + error.message);
+        }
+    }
 
 }));
 
