@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import useCartStore from '../store/cartStore';
 
@@ -7,6 +8,11 @@ const CartPage = () => {
   const cartItems = useCartStore((state) => state.cartItems) || [];
   const addToCart = useCartStore((state) => state.addToCart);
   const removeFromCart = useCartStore((state) => state.removeFromCart);
+  const syncCart = useCartStore((state) => state.syncCart);
+
+  useEffect(() => {
+    syncCart();
+  }, [syncCart]);
 
   const checkoutHandler = () => {
     navigate('/login?redirect=/shipping');
