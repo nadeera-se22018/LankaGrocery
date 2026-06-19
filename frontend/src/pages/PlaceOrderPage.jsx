@@ -8,7 +8,11 @@ import CheckoutSteps from '../components/CheckoutSteps';
 const PlaceOrderPage = () => {
   const navigate = useNavigate();
   
-  const { cartItems, shippingAddress, paymentMethod, clearCartItems } = useCartStore();
+  const { cartItems, shippingAddress, paymentMethod, clearCartItems, syncCart } = useCartStore();
+
+  useEffect(() => {
+    syncCart();
+  }, [syncCart]);
 
   useEffect(() => {
     if (!shippingAddress.address) {
