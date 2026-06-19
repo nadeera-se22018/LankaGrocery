@@ -1,5 +1,9 @@
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { Toaster } from 'react-hot-toast';
+import { useEffect } from 'react';
+import axios from 'axios';
+import useAuthStore from './store/authStore';
+import useCartStore from './store/cartStore';
 import Header from './components/Header';
 import Footer from './components/Footer';
 import HomePage from './pages/HomePage';
@@ -22,8 +26,58 @@ import UserEditPage from './pages/admin/UserEditPage';
 import Chatbot from './components/Chatbot';
 import WishlistPage from './pages/WishlistPage';
 import BottomNav from './components/BottomNav';
+import toast from 'react-hot-toast';
 
 const App = () => {
+  const { userInfo } = useAuthStore();
+  const addToCart = useCartStore((state) => state.addToCart);
+  const syncCart = useCartStore((state) => state.syncCart);
+
+  useEffect(() => {
+    syncCart();
+  }, [syncCart]);
+
+  useEffect(() => {
+    if (userInfo) {
+      const checkExpiredOrders = async () => {
+        try {
+          const { data: orders } = await axios.get('/api/orders/myorders');
+          const now = new Date();
+          const thirtyMinutes = 30 * 60 * 1000;
+
+          for (const order of orders) {
+            if (!order.isPaid && order.paymentMethod !== 'Cash on Delivery') {
+              const createdAtTime = new Date(order.createdAt).getTime();
+              const timeDiff = now.getTime() - createdAtTime;
+
+              if (timeDiff >= thirtyMinutes) {
+                try {
+                  const { data } = await axios.put(`/api/orders/${order._id}/expire`);
+                  if (data.items && data.items.length > 0) {
+                    data.items.forEach((item) => {
+                      addToCart(item);
+                    });
+                    toast.error(`Order ${order._id.substring(0, 10)}... has expired. Items returned to cart with updated prices.`, {
+                      duration: 6000
+                    });
+                  }
+                } catch (err) {
+                  console.log("Failed to expire order via global check: " + err.message);
+                }
+              }
+            }
+          }
+        } catch (error) {
+          console.log("Error checking expired orders globally: " + error.message);
+        }
+      };
+
+      checkExpiredOrders();
+      const interval = setInterval(checkExpiredOrders, 60000);
+      return () => clearInterval(interval);
+    }
+  }, [userInfo, addToCart]);
+
   return (
     <Router>
       <Toaster 
