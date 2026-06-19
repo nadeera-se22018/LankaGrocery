@@ -1,4 +1,5 @@
 import Order from '../models/orderModel.js';
+import Product from '../models/productModel.js';
 
 export const addOrderItems = async (req, res) => {
     try {
@@ -119,5 +120,64 @@ export const updateOrderToPaid = async (req, res) => {
         }
     } catch (error) {
         res.status(500).json({ message: 'Could not update the payment', error: error.message });
+    }
+};
+
+export const expireOrder = async (req, res) => {
+    try {
+        const order = await Order.findById(req.params.id);
+
+        if (!order) {
+            res.status(404).json({ message: 'Order not found' });
+            return;
+        }
+
+        if (order.user.toString() !== req.user._id.toString()) {
+            res.status(403).json({ message: 'Not authorized to modify this order' });
+            return;
+        }
+
+        if (order.isPaid) {
+            res.status(400).json({ message: 'Paid orders cannot be expired' });
+            return;
+        }
+
+        if (order.paymentMethod === 'Cash on Delivery') {
+            res.status(400).json({ message: 'Cash on Delivery orders cannot be expired' });
+            return;
+        }
+
+        const updatedItems = [];
+        for (const item of order.orderItems) {
+            const product = await Product.findById(item.product);
+            if (product) {
+                updatedItems.push({
+                    _id: product._id.toString(),
+                    name: product.name,
+                    image: product.image,
+                    price: product.price,
+                    countInStock: product.countInStock,
+                    qty: item.qty,
+                });
+            } else {
+                updatedItems.push({
+                    _id: item.product.toString(),
+                    name: item.name,
+                    image: item.image,
+                    price: item.price,
+                    countInStock: 0,
+                    qty: item.qty,
+                });
+            }
+        }
+
+        await Order.deleteOne({ _id: order._id });
+
+        res.status(200).json({
+            message: 'Order expired successfully',
+            items: updatedItems,
+        });
+    } catch (error) {
+        res.status(500).json({ message: 'Could not expire the order', error: error.message });
     }
 };
