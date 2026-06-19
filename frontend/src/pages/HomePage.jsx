@@ -113,7 +113,7 @@ const HomePage = () => {
           <h2 className="text-2xl font-black text-slate-800 tracking-tight">Explore Categories</h2>
         </div>
         
-        <div className="flex overflow-x-auto pb-4 gap-5 snap-x [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
+        <div className="flex overflow-x-auto pt-2 px-2 pb-4 gap-5 snap-x [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
           <button 
             onClick={() => navigate('/')}
             className={`snap-start flex-shrink-0 group flex flex-col items-center justify-center min-w-[120px] h-[130px] rounded-3xl transition-all duration-300 border-2 ${
