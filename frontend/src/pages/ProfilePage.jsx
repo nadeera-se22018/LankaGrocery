@@ -3,6 +3,40 @@ import { Link } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import axios from 'axios';
 import useAuthStore from '../store/authStore';
+import useCartStore from '../store/cartStore';
+
+const CountdownTimer = ({ order, onExpire }) => {
+  const [timeLeft, setTimeLeft] = useState('');
+
+  useEffect(() => {
+    const calculateTime = () => {
+      const difference = new Date(order.createdAt).getTime() + 30 * 60 * 1000 - Date.now();
+      if (difference <= 0) {
+        setTimeLeft('00:00');
+        onExpire(order._id);
+        return false;
+      }
+      const mins = Math.floor((difference / 1000 / 60) % 60);
+      const secs = Math.floor((difference / 1000) % 60);
+      setTimeLeft(`${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`);
+      return true;
+    };
+
+    const active = calculateTime();
+    if (!active) return;
+
+    const timer = setInterval(() => {
+      const active = calculateTime();
+      if (!active) {
+        clearInterval(timer);
+      }
+    }, 1000);
+
+    return () => clearInterval(timer);
+  }, [order, onExpire]);
+
+  return <span className="font-semibold text-amber-600 animate-pulse">{timeLeft}</span>;
+};
 
 const ProfilePage = () => {
   const [name, setName] = useState('');
@@ -12,23 +46,48 @@ const ProfilePage = () => {
   const [orders, setOrders] = useState([]);
 
   const { userInfo, updateProfile } = useAuthStore();
+  const { addToCart } = useCartStore();
+
+  const fetchMyOrders = async () => {
+    try {
+      const { data } = await axios.get('/api/orders/myorders');
+      const filtered = data.filter(order => {
+        if (!order.isPaid && order.paymentMethod !== 'Cash on Delivery') {
+          const difference = new Date(order.createdAt).getTime() + 30 * 60 * 1000 - Date.now();
+          return difference > 0;
+        }
+        return true;
+      });
+      setOrders(filtered);
+    } catch (error) {
+      toast.error('Could not load orders');
+    }
+  };
 
   useEffect(() => {
     if (userInfo) {
       setName(userInfo.name);
       setEmail(userInfo.email);
     }
-
-    const fetchMyOrders = async () => {
-      try {
-        const { data } = await axios.get('/api/orders/myorders');
-        setOrders(data);
-      } catch (error) {
-        toast.error('Could not load orders');
-      }
-    };
     fetchMyOrders();
   }, [userInfo]);
+
+  const handleExpireOrder = async (orderId) => {
+    try {
+      const { data } = await axios.put(`/api/orders/${orderId}/expire`);
+      if (data.items && data.items.length > 0) {
+        data.items.forEach(item => {
+          addToCart(item);
+        });
+        toast.error(`Order ${orderId.substring(0, 10)}... has expired. Items returned to cart.`, {
+          duration: 6000
+        });
+      }
+      fetchMyOrders();
+    } catch (error) {
+      console.log("Error expiring order: " + error.message);
+    }
+  };
 
   const submitHandler = async (e) => {
     e.preventDefault();
@@ -119,6 +178,7 @@ const ProfilePage = () => {
                     <th className="px-6 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Date</th>
                     <th className="px-6 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Total</th>
                     <th className="px-6 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Paid</th>
+                    <th className="px-6 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Time Left</th>
                     <th className="px-6 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Delivered</th>
                     <th className="px-6 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Details</th>
                   </tr>
@@ -134,6 +194,13 @@ const ProfilePage = () => {
                           <span className="text-green-600 font-bold">Yes</span>
                         ) : (
                            <span className="text-red-500 font-bold text-xl">⨯</span>
+                        )}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                        {!order.isPaid && order.paymentMethod !== 'Cash on Delivery' ? (
+                          <CountdownTimer order={order} onExpire={handleExpireOrder} />
+                        ) : (
+                          <span className="text-gray-400 font-normal">-</span>
                         )}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
